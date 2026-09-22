@@ -1,0 +1,261 @@
+---
+// Hero com scroll-scrubbing — extraído de hero-scroll-demo.html.
+//
+// Troca futura por vídeo: quando o clipe (frame inicial = imageA, frame
+// final = imageB) estiver pronto, troque as duas <img class="frame"> por uma
+// única <video class="frame">, remova frame-b/o crossfade em CSS, e no
+// <script> abaixo troque a linha marcada por
+// `video.currentTime = progress * video.duration`. A lógica de leitura do
+// scroll (getBoundingClientRect + --p) permanece idêntica.
+import GlassButton from './GlassButton.astro';
+
+interface Props {
+  imageA?: string;
+  imageB?: string;
+  imageAlt?: string;
+  eyebrow?: string;
+  lead?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+const {
+  imageA = '/1.jpeg',
+  imageB = '/2.jpeg',
+  imageAlt = '',
+  eyebrow = 'São Paulo, Brasil',
+  lead = 'WordPress sob medida e produtos em Next.js/React — sempre com atenção ao detalhe visual, não só ao código.',
+  ctaLabel = 'Ver projetos',
+  ctaHref = '#projetos',
+} = Astro.props;
+---
+
+<section class="scroll-hero" id="inicio">
+  <div class="pin" id="scroll-hero-pin">
+    <img class="frame frame-a" src={imageA} alt={imageAlt} fetchpriority="high" />
+    <img class="frame frame-b" src={imageB} alt="" aria-hidden="true" />
+    <div class="grade"></div>
+    <div class="grain"></div>
+
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="dot"></span>{eyebrow}</div>
+      <h1><slot name="headline">Willian Pereira — <em>desenvolvedor</em> com olhar de design.</slot></h1>
+      <p>{lead}</p>
+      <GlassButton href={ctaHref} tone="dark" class="cta">{ctaLabel}</GlassButton>
+    </div>
+
+    <div class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M12 4v14M6 12l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      Role para continuar
+    </div>
+  </div>
+</section>
+
+<style>
+  .scroll-hero {
+    position: relative;
+    height: 300vh;
+  }
+
+  .pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    --p: 0; /* progresso de 0 a 1, atualizado via JS a cada frame de scroll */
+  }
+
+  .frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 62% 30%;
+    will-change: transform, opacity;
+  }
+  .frame-a {
+    transform: scale(calc(1.08 - 0.08 * var(--p))) translateY(calc(-3% * var(--p)));
+  }
+  .frame-b {
+    opacity: var(--p);
+    transform: scale(calc(1.14 - 0.14 * var(--p))) translateY(calc(-3% * var(--p)));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .frame-a,
+    .frame-b {
+      transform: none;
+    }
+  }
+
+  /* enquadramento mobile — só .frame-b precisa de ajuste: os dois frames
+     têm a pessoa em lados opostos da foto (frame-a ~62%, à direita —
+     coincide com o valor padrão; frame-b ~30%, à esquerda — visto direto
+     nos arquivos em public/1.jpeg e public/2.jpeg), então herdar o mesmo
+     62% do frame-a cortava o corpo em frame-b. Precisa vir depois da
+     regra base .frame (acima) no arquivo: mesma especificidade (uma
+     classe cada), media query não muda isso, então a ordem no arquivo
+     decide o empate. */
+  @media (max-width: 768px) {
+    .frame-b {
+      object-position: 30% 30%;
+    }
+  }
+
+  /* grade de cor unificando as duas fotos + vinheta — sempre escura,
+     independente do tema do site, para manter a legibilidade do texto */
+  .grade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(100deg, rgba(11, 9, 7, 0.86) 0%, rgba(11, 9, 7, 0.55) 30%, rgba(11, 9, 7, 0.08) 58%, transparent 74%),
+      linear-gradient(0deg, rgba(11, 9, 7, 0.9) 0%, transparent 34%),
+      radial-gradient(120% 90% at 50% 100%, rgba(11, 9, 7, 0.4), transparent 60%);
+  }
+  .grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .hero-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 22px 64px;
+    max-width: 640px;
+    opacity: clamp(0, calc((1 - var(--p)) / 0.55), 1);
+    transform: translateY(calc(var(--p) * -14px));
+  }
+  @media (min-width: 768px) {
+    .hero-copy {
+      padding: 0 56px 88px;
+    }
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent-300);
+  }
+  .eyebrow .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent-300);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-300) 20%, transparent);
+    animation: pulse-soft 2.6s ease-in-out infinite;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(34px, 6vw, 58px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: #f5f1e8;
+    text-shadow: 0 1px 24px rgba(11, 9, 7, 0.6);
+  }
+  h1 :global(em) {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-300);
+  }
+
+  .hero-copy p {
+    margin-top: 16px;
+    max-width: 46ch;
+    color: #ded6e6;
+    font-size: 17px;
+    line-height: 1.6;
+    text-shadow: 0 1px 16px rgba(11, 9, 7, 0.7);
+  }
+
+  .hero-copy :global(.cta) {
+    margin-top: 30px;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #b9a99a;
+    opacity: clamp(0, calc(1 - var(--p) * 6), 1);
+  }
+  .scroll-hint svg {
+    width: 16px;
+    height: 16px;
+    animation: float-hint 1.8s ease-in-out infinite;
+  }
+  @keyframes float-hint {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-hint svg {
+      animation: none;
+    }
+    .eyebrow .dot {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const pin = document.getElementById('scroll-hero-pin');
+  const hero = document.getElementById('inicio');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let ticking = false;
+
+  function update() {
+    ticking = false;
+    if (!pin || !hero) return;
+
+    const rect = hero.getBoundingClientRect();
+    const scrollRange = hero.offsetHeight - window.innerHeight;
+    let progress = scrollRange > 0 ? -rect.top / scrollRange : 0;
+    progress = Math.max(0, Math.min(1, progress));
+
+    // Troca futura por vídeo: substitua a linha abaixo por
+    // `video.currentTime = progress * video.duration`.
+    pin.style.setProperty('--p', String(reduced ? Math.round(progress) : progress));
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  update();
+</script>

@@ -1,0 +1,395 @@
+---
+// Menu lateral fixo — índice vertical recolhido que expande em cascata no
+// hover do painel inteiro (não item a item). Peça autoral em cima dos
+// tokens do design system (ds.html): vidro padrão, acento roxo-300,
+// Archivo mono, easing cubic-bezier(.16,1,.3,1) já usada em todo o site
+// pras animações de eyebrow/reveal. O elemento central é a "espinha": uma
+// linha vertical com um brilho (.spine-glow) que desliza até a altura do
+// item ativo — glow é um <div> real (não ::before) porque estilo de
+// pseudo-elemento não é manipulável via JS.
+interface SectionLink {
+  roman: string;
+  label: string;
+  id: string;
+}
+
+const sections: SectionLink[] = [
+  { roman: 'I', label: 'Início', id: 'inicio' },
+  { roman: 'II', label: 'Como eu trabalho', id: 'como-eu-trabalho' },
+  { roman: 'III', label: 'Experiência', id: 'experiencia' },
+  { roman: 'IV', label: 'Projetos', id: 'projetos' },
+  { roman: 'V', label: 'Kit de ferramentas', id: 'kit-de-ferramentas' },
+  { roman: 'VI', label: 'Contato', id: 'contato' },
+];
+---
+
+<nav class="nav-rail" aria-label="Navegação de seções">
+  <div class="nav-rail-inner">
+    <div class="nav-rail-spine">
+      <div class="spine-glow"></div>
+    </div>
+
+    {
+      sections.map((s, i) => (
+        <a href={`#${s.id}`} class="nav-rail-item" data-target={s.id} style={`--i: ${i}`}>
+          <span class="roman">{s.roman}</span>
+          <span class="connector" aria-hidden="true">
+            <span class="connector-line" />
+            <span class="connector-dot" />
+          </span>
+          <span class="label">{s.label}</span>
+        </a>
+      ))
+    }
+  </div>
+</nav>
+
+<style>
+  .nav-rail {
+    position: fixed;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 70;
+  }
+  /* só desktop — mesma decisão já tomada no toc-rail de ds.html: numa
+     tela estreita esse índice competiria com o conteúdo em vez de ajudar */
+  @media (max-width: 1099px) {
+    .nav-rail {
+      display: none;
+    }
+  }
+
+  /* oculto por padrão enquanto o usuário está dentro do Hero — reaparece
+     com fade + leve slide horizontal assim que a seção sair de vista (ver
+     heroObserver no script). translate(-8px,-50%) → (0,-50%) preserva a
+     centralização vertical que já vem de transform: translateY(-50%) na
+     regra base, só somando o deslizar de entrada. */
+  @media (min-width: 1100px) {
+    .nav-rail {
+      opacity: 0;
+      transform: translate(-8px, -50%);
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-rail.is-visible {
+      opacity: 1;
+      transform: translate(0, -50%);
+      pointer-events: auto;
+    }
+  }
+
+  .nav-rail-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 20px 14px;
+    border-radius: 24px;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    background-color: var(--panel-bg, rgba(26, 22, 18, 0.8));
+    background-image: var(--glass-sheen, none);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: var(--glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.16)),
+      var(--panel-shadow, 0 16px 34px -24px rgba(0, 0, 0, 0.55));
+  }
+
+  /* ---------- Espinha: linha vertical + brilho que desliza até o item
+     ativo (posição do glow é lida via offsetTop do item ativo, ver
+     script) ---------- */
+  .nav-rail-spine {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    bottom: 20px;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--border-soft) 15%, var(--border-soft) 85%, transparent);
+    transform: translateX(-50%);
+    z-index: 0;
+  }
+  .spine-glow {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 8px;
+    height: 40px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent-300) 55%, transparent) 0%, transparent 70%);
+    transition: top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  /* ---------- Item: recolhido por padrão (só o numeral romano visível) —
+     expande em cascata no hover do CONTAINER inteiro, não do item
+     individual, pra abrir tudo junto em vez de um de cada vez ---------- */
+  .nav-rail-item {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 20px 0px 0px;
+    align-items: center;
+    gap: 0;
+    height: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text-mute);
+    transition: grid-template-columns 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+  }
+
+  .roman {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-align: center;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+  }
+
+  .connector {
+    position: relative;
+    height: 1px;
+    width: 100%;
+  }
+  .connector-line {
+    position: absolute;
+    inset: 0;
+    background: var(--accent-300);
+    transform-origin: 0;
+    transform: scaleX(0);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .connector-dot {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--cream-100);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--accent-300) 70%, transparent);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s, opacity 0.2s ease;
+  }
+
+  .label {
+    padding-left: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* cascata: delay incremental por item via --i (setado inline no map()) */
+  .nav-rail-inner:hover .nav-rail-item {
+    grid-template-columns: 20px 28px auto;
+    transition-delay: calc(var(--i, 0) * 40ms);
+  }
+  .nav-rail-inner:hover .connector-line {
+    transform: scaleX(1);
+    transition-delay: calc(var(--i, 0) * 40ms + 0.1s);
+  }
+  .nav-rail-inner:hover .connector-dot {
+    left: 100%;
+    opacity: 1;
+    transition-delay: calc(var(--i, 0) * 40ms + 0.1s);
+  }
+
+  /* estado ativo — visível mesmo com o menu recolhido (só o numeral) */
+  .nav-rail-item.is-active .roman {
+    color: var(--accent-300);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--accent-300) 60%, transparent);
+  }
+  .nav-rail-item.is-active .label {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .nav-rail-item:hover .roman,
+  .nav-rail-item:hover .label {
+    color: var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-rail-item,
+    .connector-line,
+    .connector-dot {
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+    }
+    .spine-glow {
+      transition: none !important;
+    }
+    .nav-rail {
+      transition: none;
+    }
+  }
+
+  /* Mobile — vira uma pílula horizontal fixa no rodapé, com a mesma lógica
+     de "intenção de voltar" do BackToTop.astro (aparece rolando pra cima,
+     longe do topo), só que ancorada embaixo em vez de em cima — some pra
+     BAIXO da tela (translateY positivo) em vez de pra cima. Fica por
+     último no arquivo de propósito: para as mesmas classes (.nav-rail,
+     .nav-rail-inner, .nav-rail-item...) que também têm regra base
+     incondicional (sem media query) mais acima, CSS resolve o empate de
+     especificidade pela ordem no arquivo — não importa que essas regras
+     estejam dentro de @media, uma regra depois sempre vence uma de mesma
+     especificidade declarada antes. Colocado no meio do arquivo (como na
+     primeira versão), essa media query perdia pra .nav-rail-inner/
+     .nav-rail-item base (que vêm depois), e o layout ficava vertical
+     mesmo em telas estreitas — por isso vem por último aqui. */
+  @media (max-width: 768px) {
+    .nav-rail {
+      display: flex;
+      left: 50%;
+      top: auto;
+      bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+      transform: translate(-50%, 140%);
+      opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-rail.is-visible {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+    .nav-rail-inner {
+      flex-direction: row;
+      gap: 4px;
+      padding: 8px 10px;
+    }
+    .nav-rail-spine {
+      display: none;
+    }
+    .nav-rail-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .nav-rail-item .connector,
+    .nav-rail-item .label {
+      display: none;
+    }
+    .nav-rail-item.is-active {
+      background: color-mix(in srgb, var(--accent-300) 22%, transparent);
+    }
+    .nav-rail-item.is-active .roman {
+      color: var(--accent-300);
+    }
+  }
+</style>
+
+<script>
+  interface LenisLike {
+    scrollTo: (target: Element, opts?: Record<string, unknown>) => void;
+  }
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const items = Array.from(document.querySelectorAll<HTMLAnchorElement>('.nav-rail-item'));
+  const spineGlow = document.querySelector<HTMLElement>('.spine-glow');
+
+  const sectionEls = items
+    .map((item) => {
+      const id = item.dataset.target;
+      return id ? document.getElementById(id) : null;
+    })
+    .filter((el): el is HTMLElement => el !== null);
+
+  function setActive(idx: number) {
+    items.forEach((item, i) => item.classList.toggle('is-active', i === idx));
+    const activeItem = items[idx];
+    if (spineGlow && activeItem) {
+      spineGlow.style.top = `${activeItem.offsetTop + activeItem.offsetHeight / 2 - 22}px`;
+    }
+  }
+
+  if (sectionEls.length) {
+    const spy = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const idx = sectionEls.indexOf(entry.target as HTMLElement);
+          if (idx !== -1) setActive(idx);
+        }
+      },
+      { rootMargin: '-45% 0px -50% 0px' }
+    );
+    sectionEls.forEach((el) => spy.observe(el));
+  }
+
+  // visibilidade do rail: some enquanto o usuário está dentro do Hero,
+  // reaparece assim que ele sair de vista (rolou além do wrapper de
+  // 300vh) — mesmo padrão de IntersectionObserver do scroll-spy acima,
+  // sem lógica de scroll manual. Como o Hero é a primeira seção da
+  // página, ele já está visível no load, então o estado inicial correto
+  // (oculto) acontece naturalmente, sem precisar setar nada à mão antes
+  // do observer disparar.
+  const heroEl = document.getElementById('inicio');
+  const railEl = document.querySelector<HTMLElement>('.nav-rail');
+
+  if (heroEl && railEl) {
+    const heroObserver = new IntersectionObserver(
+      ([entry]) => {
+        railEl.classList.toggle('is-visible', !entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+    heroObserver.observe(heroEl);
+  }
+
+  // clique: usa o Lenis compartilhado (exposto por ScrollStack.astro) —
+  // ele controla o scroll da janela inteira, então um <a href="#id"> puro
+  // brigaria com ele. Sem Lenis disponível (ou reduced motion), cai pro
+  // scrollIntoView nativo.
+  items.forEach((item) => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = item.dataset.target;
+      const target = id ? document.getElementById(id) : null;
+      if (!target) return;
+
+      const sharedLenis = (window as unknown as { __lenis?: LenisLike }).__lenis;
+      if (sharedLenis && !reducedMotion) {
+        sharedLenis.scrollTo(target, { duration: 1.2 });
+      } else {
+        target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+      }
+    });
+  });
+
+  // Mobile: aparece no topo por intenção de voltar (rolar pra cima, longe
+  // do topo) — mesma lógica e mesmos parâmetros do BackToTop.astro.
+  // Independente da visibilidade desktop acima (heroObserver): uma só age
+  // <=768px, a outra só >=1100px, então as duas classes não colidem
+  // visualmente mesmo compartilhando o nome "is-visible".
+  const SHOW_THRESHOLD = 500;
+  let lastY = window.scrollY;
+  let ticking = false;
+
+  function handleMobileVisibility() {
+    ticking = false;
+    if (!railEl || window.innerWidth > 768) return;
+
+    const currentY = window.scrollY;
+    const scrollingUp = currentY < lastY;
+    const pastThreshold = currentY > SHOW_THRESHOLD;
+
+    railEl.classList.toggle('is-visible', scrollingUp && pastThreshold);
+    lastY = currentY;
+  }
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(handleMobileVisibility);
+      }
+    },
+    { passive: true }
+  );
+</script>

@@ -1,0 +1,209 @@
+---
+// Botão/link de "vidro" reutilizável — mecânica de hover extraída de ds.html
+// (.btn-primary/.btn-outline/.btn-icon/.btn-pill): reflexo diagonal via
+// ::before, backdrop-filter blur+saturate e brilho inset no topo.
+interface Props {
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  ariaLabel?: string;
+  /**
+   * "auto" (padrão) usa os tokens de tema (--pill-bg/--pill-shadow), para uso
+   * em cima do papel de fundo normal do site.
+   * "dark" fixa o vidro escuro exato do hero-scroll-demo.html, para uso sobre
+   * fotos — onde o botão precisa continuar legível independente do tema.
+   */
+  tone?: 'auto' | 'dark';
+  /**
+   * Recorte visual do vidro (ds.html: .btn-pill/.btn-primary/.btn-outline/
+   * .btn-icon). Só tem efeito com tone="auto" — tone="dark" continua com o
+   * único vidro fixo que já tinha.
+   * "pill" (padrão): pílula translúcida — comportamento original.
+   * "primary": sólido (--cream-100), pro CTA principal.
+   * "outline": transparente com borda, pro CTA secundário.
+   * "icon": círculo 44px sem texto, pra botão só-ícone.
+   */
+  variant?: 'pill' | 'primary' | 'outline' | 'icon';
+  id?: string;
+  disabled?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  type = 'button',
+  ariaLabel,
+  tone = 'auto',
+  variant = 'pill',
+  id,
+  disabled,
+  class: className,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag
+  id={id}
+  class:list={['glass-btn', className]}
+  data-tone={tone}
+  data-variant={variant}
+  href={href}
+  type={href ? undefined : type}
+  aria-label={ariaLabel}
+  disabled={href ? undefined : disabled}
+>
+  <slot />
+</Tag>
+
+<style>
+  .glass-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 24px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    cursor: pointer;
+    transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease,
+      backdrop-filter 0.5s ease, color 0.4s ease 0.05s;
+  }
+
+  .glass-btn:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 4px;
+  }
+
+  .glass-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* reflexo diagonal que atravessa o botão uma vez no hover */
+  .glass-btn::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    inset: -60% -80%;
+    background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.5) 50%, transparent 58%);
+    transform: translateX(-65%);
+    transition: transform 1s ease;
+    pointer-events: none;
+  }
+  .glass-btn:hover::before {
+    transform: translateX(65%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glass-btn::before {
+      transition: none;
+    }
+  }
+
+  /* --- tone="auto", variant="pill" (padrão): vidro sobre o papel de fundo
+     normal do site --- */
+  .glass-btn[data-tone='auto'][data-variant='pill'] {
+    background: var(--pill-bg);
+    border: 1px solid var(--border-soft);
+    color: var(--text);
+    box-shadow: var(--pill-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .glass-btn[data-tone='auto'][data-variant='pill']:hover {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.04) 55%),
+      color-mix(in srgb, var(--accent-400) 24%, transparent);
+    border-color: rgba(255, 255, 255, 0.45);
+    color: #fff;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 10px 30px -14px color-mix(in srgb, var(--accent-500) 55%, transparent);
+  }
+
+  /* --- tone="auto", variant="primary" (ds.html .btn-primary): sólido em
+     repouso, vira vidro no hover --- */
+  .glass-btn[data-tone='auto'][data-variant='primary'] {
+    background: var(--cream-100);
+    color: var(--ink-900);
+    border: 1px solid transparent;
+  }
+  .glass-btn[data-tone='auto'][data-variant='primary']:hover {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.04) 55%),
+      color-mix(in srgb, var(--accent-400) 24%, transparent);
+    border-color: rgba(255, 255, 255, 0.45);
+    color: #fff;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 10px 30px -14px color-mix(in srgb, var(--accent-500) 55%, transparent);
+  }
+
+  /* --- tone="auto", variant="outline" (ds.html .btn-outline): transparente
+     com borda em repouso, vira vidro (mais discreto que primary) no hover
+     — o texto permanece var(--text), não vira branco puro --- */
+  .glass-btn[data-tone='auto'][data-variant='outline'] {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+  .glass-btn[data-tone='auto'][data-variant='outline']:hover {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.02) 55%),
+      color-mix(in srgb, var(--accent-400) 18%, transparent);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: var(--text);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 10px 30px -16px color-mix(in srgb, var(--accent-500) 45%, transparent);
+  }
+
+  /* --- tone="auto", variant="icon" (ds.html .btn-icon): círculo 44px sem
+     texto — mesmo hover do outline, mas o texto/ícone vira branco puro --- */
+  .glass-btn[data-tone='auto'][data-variant='icon'] {
+    width: 44px;
+    padding: 0;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid transparent;
+  }
+  .glass-btn[data-tone='auto'][data-variant='icon']:hover {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.02) 55%),
+      color-mix(in srgb, var(--accent-400) 18%, transparent);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 10px 30px -16px color-mix(in srgb, var(--accent-500) 45%, transparent);
+  }
+  .glass-btn[data-variant='icon'] svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* --- tone="dark": vidro fixo sobre fotos (hero), sem reagir ao tema --- */
+  .glass-btn[data-tone='dark'] {
+    background: rgba(15, 12, 9, 0.35);
+    border: 1px solid rgba(245, 241, 232, 0.32);
+    color: #f5f1e8;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .glass-btn[data-tone='dark']:hover {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.02) 55%),
+      rgba(150, 121, 176, 0.28);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 10px 30px -16px rgba(150, 121, 176, 0.5);
+  }
+</style>

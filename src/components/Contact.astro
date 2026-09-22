@@ -1,0 +1,464 @@
+---
+// Seção "Contato" — sexta e última seção do site (eyebrow "05"). Painel de
+// canais ("Correspondência") é o elemento central da seção, não um
+// complemento ao lado de formulário — pedido explícito era NÃO ter form
+// nenhum aqui. Tokens/acabamento de vidro reaproveitados de ds.html, nada
+// inventado (mesmo padrão de .scroll-stack-card/.toolkit-card).
+import GlassButton from './GlassButton.astro';
+
+const EMAIL = 'willianpereira0912@gmail.com';
+
+interface Channel {
+  label: string;
+  value: string;
+  href: string;
+  external: boolean;
+  ariaLabel?: string;
+}
+
+const channels: Channel[] = [
+  {
+    label: 'E-mail',
+    value: EMAIL,
+    href: `mailto:${EMAIL}`,
+    external: false,
+  },
+  {
+    label: 'WhatsApp',
+    value: '(11) 96523-9222',
+    href: 'https://wa.me/5511965239222',
+    external: false,
+    ariaLabel: 'Conversar no WhatsApp',
+  },
+  {
+    label: 'LinkedIn',
+    value: 'linkedin.com/in/willian21',
+    href: 'https://www.linkedin.com/in/willian21/',
+    external: true,
+    ariaLabel: 'Abrir perfil no LinkedIn em uma nova aba',
+  },
+  {
+    label: 'GitHub',
+    value: 'github.com/GotWill',
+    href: 'https://github.com/GotWill',
+    external: true,
+    ariaLabel: 'Abrir perfil no GitHub em uma nova aba',
+  },
+];
+---
+
+<section class="contact" id="contato">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-intro">
+        <div class="eyebrow" id="contact-eyebrow">
+          <span class="index">05</span>
+          <span class="rule"></span>
+          <span class="label">Contato</span>
+        </div>
+
+        <h2>Vamos <em>conversar?</em></h2>
+
+        <p class="lead">
+          Fique à vontade para entrar em contato. Estou sempre aberto a novas conexões, oportunidades e boas
+          conversas sobre tecnologia.
+        </p>
+
+        <GlassButton type="button" id="copy-email-btn" ariaLabel={`Copiar e-mail ${EMAIL}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M3 2a1 1 0 00-1 1v6h6a1 1 0 000-2H5.757a8 8 0 11-1.485 7.07 1 1 0 10-1.931.517 10.002 10.002 0 0018.093 2.782A9.999 9.999 0 004 6V3a1 1 0 00-1-1Z" />
+          </svg>
+          <span data-copy-label>Copiar e-mail</span>
+        </GlassButton>
+      </div>
+
+      <div class="mail-panel">
+        <div class="mail-panel-head">
+          <span class="mail-panel-label">Correspondência</span>
+          <span class="tag-pill">Quatro canais</span>
+        </div>
+
+        <ul class="channel-list">
+          {
+            channels.map((ch) => (
+              <li>
+                <a
+                  class="channel-row"
+                  href={ch.href}
+                  aria-label={ch.ariaLabel}
+                  target={ch.external ? '_blank' : undefined}
+                  rel={ch.external ? 'noopener noreferrer' : undefined}
+                >
+                  <span class="channel-label">{ch.label}</span>
+                  <span class="channel-value">{ch.value}</span>
+                  {ch.external ? (
+                    <svg class="channel-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                      <path d="M7 17 17 7M8 7h9v9" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  ) : (
+                    <svg class="channel-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                      <path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  )}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    padding: 88px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  @media (min-width: 768px) {
+    .container {
+      padding: 0 40px;
+    }
+  }
+
+  /* Eyebrow — mesmo padrão animado (estrela cadente) das outras seções.
+     width:100% é necessário aqui porque .contact-intro é flex-column com
+     align-items:flex-start (pro botão/lead não esticarem full-width) —
+     isso encolhe .eyebrow pro tamanho do conteúdo, deixando 0px de espaço
+     livre pro .rule (flex:1) crescer. Nas outras seções o pai do eyebrow
+     é um bloco normal (largura cheia), então esse problema não existe lá. */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    margin-bottom: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent-300);
+  }
+  .eyebrow .rule {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--ink-200), transparent);
+    position: relative;
+    overflow: visible;
+    transform-origin: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow .rule {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+  }
+  .eyebrow .rule::before,
+  .eyebrow .rule::after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .eyebrow .rule::before {
+    inset: -1px 0;
+    transform-origin: 0;
+    background: linear-gradient(
+      270deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cream-100) 30%, transparent) 24%,
+      var(--accent-300) 68%,
+      var(--cream-100) 100%
+    );
+  }
+  .eyebrow .rule::after {
+    top: 50%;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--cream-100);
+    transform: translate(-50%, -50%) scale(0.55);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-300) 70%, transparent),
+      0 0 18px color-mix(in srgb, var(--cream-100) 35%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow.is-revealed .rule {
+      animation: chapter-rule-settle 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::before {
+      animation: chapter-rule-sweep 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::after {
+      animation: chapter-rule-burst 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+  @keyframes chapter-rule-settle {
+    0% {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    56% {
+      opacity: 0.9;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes chapter-rule-sweep {
+    0% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(-72%) scaleX(0.18);
+    }
+    14% {
+      opacity: 0.85;
+    }
+    58% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-300) 55%, transparent));
+      transform: translateX(18%) scaleX(0.92);
+    }
+    100% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(88%) scaleX(0.2);
+    }
+  }
+  @keyframes chapter-rule-burst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.45);
+    }
+    16% {
+      opacity: 1;
+      transform: translate(10px, -50%) scale(0.8);
+    }
+    58% {
+      opacity: 1;
+      transform: translate(76px, -50%) scale(1.15);
+    }
+    78% {
+      opacity: 0.36;
+      transform: translate(94px, -50%) scale(1.7);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(104px, -50%) scale(2.05);
+    }
+  }
+
+  h2 {
+    margin: 0 0 24px;
+    font-size: clamp(32px, 5.4vw, 56px);
+    line-height: 1.16;
+    max-width: 16ch;
+  }
+  h2 em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-300);
+  }
+
+  /* ---------- Grid principal: painel de correspondência é o elemento
+     central, não complemento — por isso ganha a coluna mais larga ---------- */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+
+  .contact-intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lead {
+    margin: 0 0 32px;
+    max-width: 46ch;
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text-soft);
+  }
+
+  /* ---------- Painel "Correspondência" — mesmo vidro dos outros painéis
+     do site (glass-sheen/glass-border/glass-highlight, ver
+     .scroll-stack-card em ScrollStack.astro) ---------- */
+  .mail-panel {
+    border-radius: 24px;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    background-color: var(--panel-bg, rgba(26, 22, 18, 0.8));
+    background-image: var(--glass-sheen, none);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: var(--glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 46px rgba(255, 255, 255, 0.025)),
+      var(--panel-shadow, 0 16px 34px -24px rgba(0, 0, 0, 0.55));
+    overflow: hidden;
+  }
+
+  .mail-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .mail-panel-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--ink-700) 45%, transparent);
+    color: var(--ink-100);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 6px 13px;
+  }
+
+  .channel-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 12px;
+  }
+  .channel-list li:last-child .channel-row {
+    border-bottom: none;
+  }
+
+  .channel-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 48px;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.25s ease;
+  }
+  .channel-row:hover,
+  .channel-row:focus-visible {
+    background: color-mix(in srgb, var(--ink-900) 12%, transparent);
+  }
+  .channel-row:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: -2px;
+  }
+
+  .channel-label {
+    flex: none;
+    width: 5.5em;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+
+  .channel-value {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.25s ease;
+  }
+
+  .channel-arrow {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--text-mute);
+    transition: color 0.25s ease, transform 0.25s ease;
+  }
+
+  .channel-row:hover .channel-value,
+  .channel-row:focus-visible .channel-value,
+  .channel-row:hover .channel-arrow,
+  .channel-row:focus-visible .channel-arrow {
+    color: var(--accent-300);
+  }
+  .channel-row:hover .channel-arrow,
+  .channel-row:focus-visible .channel-arrow {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 420px) {
+    .channel-label {
+      width: 4.4em;
+      font-size: 9.5px;
+    }
+    .channel-value {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<script define:vars={{ EMAIL }}>
+  const copyBtn = document.getElementById('copy-email-btn');
+  const copyLabel = copyBtn?.querySelector('[data-copy-label]');
+  let resetTimerId = null;
+
+  copyBtn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+    } catch {
+      return;
+    }
+    if (!copyLabel) return;
+    copyLabel.textContent = 'Copiado!';
+    if (resetTimerId != null) window.clearTimeout(resetTimerId);
+    resetTimerId = window.setTimeout(() => {
+      copyLabel.textContent = 'Copiar e-mail';
+    }, 1500);
+  });
+
+  // eyebrow: mesmo reveal (estrela cadente) das outras seções
+  const eyebrow = document.getElementById('contact-eyebrow');
+  if (eyebrow) {
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            eyebrow.classList.add('is-revealed');
+            revealObserver.disconnect();
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    revealObserver.observe(eyebrow);
+  }
+</script>

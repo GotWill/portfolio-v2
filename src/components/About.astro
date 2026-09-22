@@ -1,0 +1,151 @@
+---
+// Seção "Sobre" — duas colunas (texto com letra capitular / foto),
+// assinatura sobre régua pontilhada. Tokens reaproveitados de ds.html;
+// a letra capitular usa o acento roxo (roxo-300) em vez do peach da
+// referência.
+import photo from '../assets/2.jpeg';
+import TiltGlow from './TiltGlow.astro';
+---
+
+<section class="about" id="sobre">
+  <div class="container">
+    <div class="grid">
+      <div class="text-col">
+        <p class="lead">
+          Desenvolvedor Full Stack com foco em Front-End, com experiência em JavaScript, TypeScript, React,
+          Next.js, PHP, entre outras tecnologias. Sou movido pela curiosidade e paixão por aprender — estou
+          sempre buscando evoluir, seja por meio de cursos, bootcamps ou desafios práticos.
+        </p>
+        <p>
+          Tenho vivência na criação de e-commerces (usando plataformas como Tray, Yampi e Irroba) e no
+          desenvolvimento de sistemas web personalizados, do planejamento à entrega. Também atuei na criação
+          de dashboards interativos com o Looker Studio.
+        </p>
+        <p>
+          Tenho especial interesse em criar interfaces intuitivas, responsivas e com boa usabilidade, mas
+          também me sinto confortável no back-end.
+        </p>
+        <p>Prezo por código limpo, boas práticas e por entregar valor real por meio da tecnologia.</p>
+
+        <hr class="rule-dotted" />
+
+        <div class="signature">
+          <span class="slash">/</span>
+          <span class="name">Willian Pereira</span>
+          <span class="sep">·</span>
+          <span class="role">Desenvolvedor Full-Stack</span>
+        </div>
+      </div>
+
+      <div class="image-col">
+        <TiltGlow image={photo} alt="Retrato de Willian Pereira" objectPosition="32% 15%" fill graph={false} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    padding: 88px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  @media (min-width: 768px) {
+    .container {
+      padding: 0 40px;
+    }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    align-items: stretch;
+    gap: 64px;
+  }
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+
+  .text-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  p {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    line-height: 1.7;
+    color: var(--text-soft);
+  }
+  p + p {
+    margin-top: 28px;
+  }
+
+  .lead::first-letter {
+    float: left;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 4.5em;
+    line-height: 0.82;
+    padding-right: 10px;
+    padding-top: 6px;
+    color: var(--accent-300);
+  }
+  @media (max-width: 860px) {
+    .lead::first-letter {
+      float: none;
+      font-size: 1.6em;
+      line-height: 1;
+      padding-right: 2px;
+      padding-top: 0;
+    }
+  }
+
+  .rule-dotted {
+    margin: 40px 0 24px;
+    border: none;
+    border-top: 1px dotted var(--border-soft);
+  }
+
+  .signature {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .signature .slash {
+    font-family: var(--font-mono);
+    color: var(--text-mute);
+  }
+  .signature .name {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--text);
+  }
+  .signature .sep {
+    color: var(--text-mute);
+  }
+  .signature .role {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+
+  @media (max-width: 860px) {
+    .image-col {
+      aspect-ratio: 4 / 5;
+    }
+  }
+</style>

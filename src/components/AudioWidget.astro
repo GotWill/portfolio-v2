@@ -1,0 +1,344 @@
+---
+// Widget de áudio de fundo — peça autoral sobre os tokens do design
+// system (ds.html), não um player nativo. Reaproveita: vidro padrão
+// (--glass-border/--glass-sheen/--glass-highlight/--pill-shadow), acento
+// roxo-300, Archivo mono/Newsreader itálico, easing cubic-bezier(.16,1,.3,1)
+// e a técnica de grid-template-columns colapsável já usada no NavRail.
+// eq-bounce/.np-eq (documentados em ds.html) e node-pulse (já usado em
+// TiltGlow.astro) não existiam em nenhum componente ainda — @keyframes não
+// é escopado pelo Astro, então node-pulse é reaproveitado por nome; eq-bounce
+// é definido aqui porque .np-eq (as classes visuais) precisa existir no
+// escopo de quem a usa.
+const AUDIO_SRC = '/music.mp3';
+const TRACK_LABEL = 'Sounds of Someday';
+---
+
+<div class="audio-widget" role="group" aria-label="Controle de áudio de fundo">
+  <audio id="bg-audio" src={AUDIO_SRC} loop preload="none"></audio>
+
+  <div class="audio-widget-inner">
+    <button type="button" class="audio-toggle" aria-label="Tocar música" aria-pressed="false">
+      <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M8 5.5v13l11-6.5-11-6.5Z"></path>
+      </svg>
+      <span class="np-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+
+    <div class="audio-content">
+      <div class="audio-info">
+        <span class="track-label">Tocando agora</span>
+        <span class="track-name">{TRACK_LABEL}</span>
+      </div>
+
+      <button type="button" class="mute-toggle" aria-label="Mudo" aria-pressed="false">
+        <svg class="icon-speaker" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9v6h4l5 5V4L8 9H4Z" fill="currentColor"></path>
+          <path
+            d="M16.3 8.7a5 5 0 0 1 0 6.6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          ></path>
+          <path
+            d="M18.8 6.2a8.5 8.5 0 0 1 0 11.6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            opacity="0.55"
+          ></path>
+        </svg>
+        <svg class="icon-mute" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9v6h4l5 5V4L8 9H4Z" fill="currentColor"></path>
+          <path
+            d="M16.5 9.5 20.5 13.5M20.5 9.5 16.5 13.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .audio-widget {
+    position: fixed;
+    right: 22px;
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+    z-index: 75;
+  }
+
+  .audio-widget-inner {
+    display: grid;
+    grid-template-columns: 44px 0px;
+    align-items: center;
+    border-radius: 999px;
+    overflow: hidden;
+    /* saída (mouse sai / :hover cai) usa esta duração bem mais longa — a
+       entrada é mais curta, sobrescrita só em :hover abaixo */
+    transition: grid-template-columns 2.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (hover: hover) {
+    .audio-widget-inner:hover {
+      grid-template-columns: 44px auto;
+      transition-duration: 0.5s;
+    }
+  }
+  .audio-widget-inner.is-expanded {
+    grid-template-columns: 44px auto;
+  }
+
+  /* ---------- Botão principal (recolhido = estado padrão) ---------- */
+  .audio-toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    position: relative;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    background-color: var(--panel-bg, rgba(26, 22, 18, 0.8));
+    background-image: var(--glass-sheen, none);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: var(--glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.16)),
+      var(--pill-shadow, 0 12px 28px -18px rgba(0, 0, 0, 0.5));
+    cursor: pointer;
+  }
+  .audio-toggle:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 3px;
+  }
+
+  .audio-toggle svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-soft);
+  }
+
+  .audio-toggle .play-icon {
+    display: block;
+  }
+  .audio-toggle .np-eq {
+    display: none;
+  }
+  .audio-toggle.is-playing .play-icon {
+    display: none;
+  }
+  .audio-toggle.is-playing .np-eq {
+    display: flex;
+  }
+
+  /* equalizador — .np-eq/eq-bounce documentados em ds.html */
+  .np-eq {
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+  .np-eq i {
+    display: block;
+    width: 3px;
+    background: var(--accent-300);
+    border-radius: 1px;
+    transform-origin: bottom;
+    animation: eq-bounce 0.9s ease-in-out infinite;
+  }
+  .np-eq i:nth-child(1) {
+    height: 60%;
+  }
+  .np-eq i:nth-child(2) {
+    height: 100%;
+    animation-delay: 0.15s;
+  }
+  .np-eq i:nth-child(3) {
+    height: 75%;
+    animation-delay: 0.3s;
+  }
+  @keyframes eq-bounce {
+    0%,
+    100% {
+      transform: scaleY(0.32);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  /* anel pulsante enquanto toca — mesma técnica de node-pulse (TiltGlow.astro);
+     @keyframes não é escopado pelo Astro, então o nome é reaproveitado direto */
+  .audio-toggle::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-300);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .audio-toggle.is-playing::after {
+    animation: node-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  /* ---------- Conteúdo revelado na expansão ---------- */
+  .audio-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 14px;
+    padding-right: 16px;
+    white-space: nowrap;
+    /* dissolve devagar ao sair — sobrescrito (mais rápido) só ao entrar,
+       igual à técnica do grid-template-columns acima */
+    opacity: 0;
+    transition: opacity 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (hover: hover) {
+    .audio-widget-inner:hover .audio-content {
+      opacity: 1;
+      transition-duration: 0.35s;
+    }
+  }
+  .audio-widget-inner.is-expanded .audio-content {
+    opacity: 1;
+    transition-duration: 0.35s;
+  }
+
+  .audio-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .track-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-300);
+  }
+
+  .track-name {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .mute-toggle {
+    position: relative;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    background-color: var(--panel-bg, rgba(26, 22, 18, 0.8));
+    cursor: pointer;
+  }
+  .mute-toggle:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 2px;
+  }
+
+  .mute-toggle svg {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    color: var(--text-mute);
+    transition: opacity 0.2s ease;
+  }
+  .mute-toggle .icon-mute {
+    opacity: 0;
+  }
+  .mute-toggle.is-muted .icon-speaker {
+    opacity: 0;
+  }
+  .mute-toggle.is-muted .icon-mute {
+    opacity: 1;
+  }
+
+  /* ---------- Acessibilidade ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .audio-widget-inner,
+    .audio-content {
+      transition: none;
+    }
+    .audio-toggle.is-playing::after {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const audio = document.getElementById('bg-audio') as HTMLAudioElement | null;
+  const widget = document.querySelector<HTMLElement>('.audio-widget');
+  const inner = document.querySelector<HTMLElement>('.audio-widget-inner');
+  const toggle = document.querySelector<HTMLButtonElement>('.audio-toggle');
+  const muteBtn = document.querySelector<HTMLButtonElement>('.mute-toggle');
+
+  const hasHover = window.matchMedia('(hover: hover)').matches;
+  const COLLAPSE_DELAY = 4000;
+  let collapseTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function scheduleCollapse() {
+    if (hasHover || !inner) return;
+    if (collapseTimer) clearTimeout(collapseTimer);
+    collapseTimer = setTimeout(() => inner.classList.remove('is-expanded'), COLLAPSE_DELAY);
+  }
+
+  function expand() {
+    if (hasHover || !inner) return;
+    inner.classList.add('is-expanded');
+    scheduleCollapse();
+  }
+
+  toggle?.addEventListener('click', () => {
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play();
+      toggle.classList.add('is-playing');
+      toggle.setAttribute('aria-pressed', 'true');
+      toggle.setAttribute('aria-label', 'Pausar música');
+    } else {
+      audio.pause();
+      toggle.classList.remove('is-playing');
+      toggle.setAttribute('aria-pressed', 'false');
+      toggle.setAttribute('aria-label', 'Tocar música');
+    }
+
+    if (!hasHover && inner) {
+      if (inner.classList.contains('is-expanded')) {
+        scheduleCollapse();
+      } else {
+        expand();
+      }
+    }
+  });
+
+  muteBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!audio) return;
+
+    audio.muted = !audio.muted;
+    muteBtn.classList.toggle('is-muted', audio.muted);
+    muteBtn.setAttribute('aria-pressed', String(audio.muted));
+    muteBtn.setAttribute('aria-label', audio.muted ? 'Ativar som' : 'Mudo');
+    scheduleCollapse();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (hasHover || !inner || !widget) return;
+    if (!inner.classList.contains('is-expanded')) return;
+    if (widget.contains(e.target as Node)) return;
+
+    inner.classList.remove('is-expanded');
+    if (collapseTimer) clearTimeout(collapseTimer);
+  });
+</script>

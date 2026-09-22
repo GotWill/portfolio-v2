@@ -1,0 +1,179 @@
+---
+// Toggle de tema — ícones e transição extraídos de ds.html
+// (.theme-toggle / .icon-moon / .icon-sun). A leitura inicial do tema (evita
+// flash) fica em <script is:inline> no <head> do Layout, não aqui.
+---
+
+<button
+  class="theme-toggle"
+  id="theme-toggle"
+  type="button"
+  aria-pressed="false"
+  aria-label="Mudar para tema claro"
+>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path
+      d="M12.3 2.5a9.5 9.5 0 1 0 9.2 12.1.75.75 0 0 0-.9-.93 7.6 7.6 0 0 1-9.6-9.6.75.75 0 0 0-.7-.97Z"
+    ></path>
+  </svg>
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path
+      d="M12 5.5a1 1 0 0 1-1-1V3a1 1 0 1 1 2 0v1.5a1 1 0 0 1-1 1Zm0 13a1 1 0 0 1 1 1V21a1 1 0 1 1-2 0v-1.5a1 1 0 0 1 1-1ZM4.5 13H3a1 1 0 1 1 0-2h1.5a1 1 0 1 1 0 2Zm16.5 0h-1.5a1 1 0 1 1 0-2H21a1 1 0 1 1 0 2ZM6.34 7.76 5.28 6.7A1 1 0 1 1 6.7 5.28l1.06 1.06a1 1 0 1 1-1.42 1.42Zm10.6 10.6-1.06-1.06a1 1 0 0 1 1.42-1.42l1.06 1.06a1 1 0 0 1-1.42 1.42ZM17.7 6.7a1 1 0 0 1 1.42 1.06l-1.06 1.06A1 1 0 1 1 16.64 7.3L17.7 6.7ZM7.06 17.06a1 1 0 0 1 0 1.42L6 19.54a1 1 0 1 1-1.42-1.42l1.06-1.06a1 1 0 0 1 1.42 0ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z"
+    ></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    position: fixed;
+    top: calc(20px + env(safe-area-inset-top, 0px));
+    right: calc(20px + env(safe-area-inset-right, 0px));
+    z-index: 80;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border-soft);
+    background: var(--pill-bg);
+    box-shadow: var(--pill-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: border-color 0.3s, transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  .theme-toggle:hover {
+    border-color: color-mix(in srgb, var(--accent-300) 55%, transparent);
+    transform: scale(1.05);
+  }
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 4px;
+  }
+
+  .theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-soft);
+    transition: color 0.3s, transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.3s;
+  }
+  .theme-toggle .icon-moon {
+    position: absolute;
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+  .theme-toggle .icon-sun {
+    position: absolute;
+    opacity: 0;
+    transform: scale(0.4) rotate(-90deg);
+  }
+  [data-theme='light'] .theme-toggle .icon-moon {
+    opacity: 0;
+    transform: scale(0.4) rotate(90deg);
+  }
+  [data-theme='light'] .theme-toggle .icon-sun {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+    color: var(--accent-400);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle,
+    .theme-toggle svg {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = 'theme';
+  const toggle = document.getElementById('theme-toggle');
+
+  // Inclinação da diagonal da cortina de transição. Positivo = a borda
+  // superior do corte fica mais pra dentro da tela que a inferior.
+  const SKEW = '6vw';
+  const DURATION = 700;
+  const EASING = 'cubic-bezier(0.16, 1, 0.3, 1)';
+
+  function applyLabel(theme: string) {
+    const isLight = theme === 'light';
+    toggle?.setAttribute('aria-pressed', String(isLight));
+    toggle?.setAttribute('aria-label', isLight ? 'Mudar para tema escuro' : 'Mudar para tema claro');
+  }
+
+  applyLabel(document.documentElement.getAttribute('data-theme') || 'dark');
+
+  function applyTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(STORAGE_KEY, next);
+    applyLabel(next);
+  }
+
+  // Reflexo diagonal em escala de tela inteira — mesma linguagem do brilho
+  // que atravessa os botões de vidro (ds.html: ::before com gradiente
+  // diagonal), só que varrendo o viewport inteiro em vez de um botão.
+  // É um elemento à parte da animação de clipPath: os dois rodam em
+  // paralelo, com a mesma duração/easing, mas essa aqui aparece e some
+  // (opacity sobe e cai rápido) pra parecer um brilho que passa, não fica.
+  function spawnSheen() {
+    const sheen = document.createElement('div');
+    sheen.setAttribute('aria-hidden', 'true');
+    sheen.style.position = 'fixed';
+    sheen.style.inset = '0';
+    sheen.style.pointerEvents = 'none';
+    sheen.style.zIndex = '9999';
+    sheen.style.background = 'color-mix(in srgb, var(--accent-300) 90%, transparent)';
+    sheen.style.filter = 'blur(6px)';
+    // Mesma inclinação do clipPath principal, só que recortada numa faixa
+    // fina (4vw) em vez de cobrir a tela inteira.
+    sheen.style.clipPath = `polygon(calc(-1 * ${SKEW}) 0%, calc(-1 * ${SKEW} + 4vw) 0%, 4vw 100%, 0% 100%)`;
+    document.body.appendChild(sheen);
+
+    const animation = sheen.animate(
+      [
+        { transform: 'translateX(110vw)', opacity: 0 },
+        { transform: 'translateX(80vw)', opacity: 1, offset: 0.15 },
+        { transform: 'translateX(-20vw)', opacity: 1, offset: 0.85 },
+        { transform: 'translateX(-45vw)', opacity: 0 },
+      ],
+      { duration: DURATION, easing: EASING }
+    );
+
+    animation.finished.then(() => sheen.remove()).catch(() => sheen.remove());
+  }
+
+  toggle?.addEventListener('click', () => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const doc = document as unknown as {
+      startViewTransition?: (callback: () => void) => {
+        ready: Promise<void>;
+        finished: Promise<void>;
+      };
+    };
+
+    if (reducedMotion || typeof doc.startViewTransition !== 'function') {
+      applyTheme();
+      return;
+    }
+
+    const transition = doc.startViewTransition(() => {
+      applyTheme();
+    });
+
+    transition.ready.then(() => {
+      // Polígono de 4 pontos: topo-esquerda, topo-direita, baixo-direita,
+      // baixo-esquerda. Topo-direita/baixo-direita ficam fixos nos dois
+      // estados — a borda direita da tela é a origem fixa da varredura.
+      const HIDDEN = 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)';
+      const REVEALED = `polygon(calc(-1 * ${SKEW}) 0%, 100% 0%, 100% 100%, 0% 100%)`;
+
+      document.documentElement.animate(
+        { clipPath: [HIDDEN, REVEALED] },
+        { duration: DURATION, easing: EASING, pseudoElement: '::view-transition-new(root)' }
+      );
+
+      spawnSheen();
+    });
+  });
+</script>

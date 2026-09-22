@@ -1,0 +1,424 @@
+---
+// Seção "Kit de ferramentas" — 7 cards de categoria. Todos com o MESMO
+// tratamento de vidro no hover, receita copiada de ds.html
+// ([data-theme="dark"] .panel + reflexo diagonal de .btn-primary/.glass-btn):
+// sheen diagonal (--glass-sheen), borda clara (--glass-border),
+// backdrop-filter blur(22px) saturate(160%), sombra com brilho interno
+// (--glass-highlight + --panel-shadow) e um reflexo que atravessa o card
+// uma vez por hover. --glass-* só existem no tema escuro em ds.html (o
+// .panel de lá também só ganha vidro lá) — por isso o vidro (itens 1-4)
+// fica sob [data-theme="dark"]; o reflexo diagonal (item 5) não é
+// theme-gated em ds.html, então roda nos dois temas.
+interface Category {
+  index: string;
+  title: string;
+  chips: string[];
+}
+
+const categories: Category[] = [
+  {
+    index: 'T.01',
+    title: 'Front-end',
+    chips: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Tailwind', 'Shadcn'],
+  },
+  {
+    index: 'T.02',
+    title: 'Back-end',
+    chips: ['PHP', 'Node', 'Nest', 'Prisma'],
+  },
+  {
+    index: 'T.03',
+    title: 'Banco de Dados',
+    chips: ['PostgreSQL', 'MySQL'],
+  },
+  {
+    index: 'T.04',
+    title: 'Tracking',
+    chips: ['Google Analytics', 'Google Tag Manager'],
+  },
+  {
+    index: 'T.05',
+    title: 'IA',
+    chips: ['Lovable', 'V0', "Claude"],
+  },
+  {
+    index: 'T.06',
+    title: 'Outros',
+    chips: ['Git', 'Looker Studio', 'Docker'],
+  },
+  {
+    index: 'T.07',
+    title: 'Testes',
+    chips: ['Testes Unitários', 'Testes Automatizados', 'Playwright'],
+  },
+];
+---
+
+<section class="toolkit" id="kit-de-ferramentas">
+  <div class="container">
+    <div class="head-row">
+      <div class="head-copy">
+        <div class="eyebrow" id="toolkit-eyebrow">
+          <span class="index">04</span>
+          <span class="rule"></span>
+          <span class="label">Kit de ferramentas</span>
+        </div>
+        <h2>Tudo que uso <em>pra sair da ideia pro deploy.</em></h2>
+      </div>
+      <p class="side-note">Sete frentes de trabalho, do primeiro esboço ao sistema no ar.</p>
+    </div>
+
+    <div class="toolkit-grid">
+      {
+        categories.map((cat) => (
+          <div class="toolkit-card">
+            <div class="card-head">
+              <span class="card-index">{cat.index}</span>
+              <span class="stars-badge">{cat.chips.length} ESTRELAS</span>
+            </div>
+
+            <h3>{cat.title}</h3>
+
+            <div class="chip-list">
+              {cat.chips.map((chip) => (
+                <span class="chip">{chip}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .toolkit {
+    padding: 88px 0;
+    border-top: 1px solid var(--border-soft);
+    /* correção garantida contra o ScrollStack (seção anterior) pintando
+       por cima do início desta seção: position+z-index positivo explícito
+       faz o Toolkit SEMPRE vencer no empilhamento contra qualquer irmão
+       anterior não-posicionado (ou posicionado sem z-index maior),
+       independente do que ainda estiver errado de contenção do lado do
+       ScrollStack. isolation:isolate contém o stacking interno dos
+       próprios cards do Toolkit, pra essa correção não vazar pra frente
+       também. */
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  @media (min-width: 768px) {
+    .container {
+      padding: 0 40px;
+    }
+  }
+
+  /* Eyebrow — mesmo padrão animado (estrela cadente) das seções anteriores */
+  .head-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 56px;
+  }
+  @media (max-width: 760px) {
+    .head-row {
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent-300);
+  }
+  .eyebrow .rule {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--ink-200), transparent);
+    position: relative;
+    overflow: visible;
+    transform-origin: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow .rule {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+  }
+  .eyebrow .rule::before,
+  .eyebrow .rule::after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .eyebrow .rule::before {
+    inset: -1px 0;
+    transform-origin: 0;
+    background: linear-gradient(
+      270deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cream-100) 30%, transparent) 24%,
+      var(--accent-300) 68%,
+      var(--cream-100) 100%
+    );
+  }
+  .eyebrow .rule::after {
+    top: 50%;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--cream-100);
+    transform: translate(-50%, -50%) scale(0.55);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-300) 70%, transparent),
+      0 0 18px color-mix(in srgb, var(--cream-100) 35%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow.is-revealed .rule {
+      animation: chapter-rule-settle 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::before {
+      animation: chapter-rule-sweep 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::after {
+      animation: chapter-rule-burst 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+  @keyframes chapter-rule-settle {
+    0% {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    56% {
+      opacity: 0.9;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes chapter-rule-sweep {
+    0% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(-72%) scaleX(0.18);
+    }
+    14% {
+      opacity: 0.85;
+    }
+    58% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-300) 55%, transparent));
+      transform: translateX(18%) scaleX(0.92);
+    }
+    100% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(88%) scaleX(0.2);
+    }
+  }
+  @keyframes chapter-rule-burst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.45);
+    }
+    16% {
+      opacity: 1;
+      transform: translate(10px, -50%) scale(0.8);
+    }
+    58% {
+      opacity: 1;
+      transform: translate(76px, -50%) scale(1.15);
+    }
+    78% {
+      opacity: 0.36;
+      transform: translate(94px, -50%) scale(1.7);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(104px, -50%) scale(2.05);
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(32px, 5.4vw, 56px);
+    line-height: 1.16;
+    max-width: 22ch;
+  }
+  h2 em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-300);
+  }
+
+  .side-note {
+    flex: none;
+    max-width: 220px;
+    margin: 6px 0 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    line-height: 1.6;
+    text-align: right;
+  }
+  @media (max-width: 760px) {
+    .side-note {
+      max-width: none;
+      text-align: left;
+    }
+  }
+
+  /* Grid de cards */
+  .toolkit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  /* ---------- Card: vidro é o acabamento padrão (sempre visível) ----------
+     Cada var() abaixo carrega o próprio fallback (2º argumento). Sem isso,
+     um var() apontando pra uma custom property que não existe em lugar
+     nenhum do CSS invalida SÓ aquela propriedade (não a regra inteira —
+     mas o efeito prático é o mesmo: a propriedade cai pro valor inicial e
+     o vidro some). --glass-spot e --glass-highlight-soft nunca foram
+     declaradas em nenhum seletor (nem aqui, nem em tokens.css) — daí não
+     aparecer nenhum efeito. Os fallbacks abaixo tornam o card funcional
+     independente de qualquer token ter sido criado antes, e valem tanto
+     pro tema escuro quanto claro (--panel-bg/--panel-shadow/
+     --panel-strong-shadow já existem nos dois temas em tokens.css e têm
+     prioridade sobre o fallback sempre que estiverem definidas). */
+  .toolkit-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 28px;
+    border-radius: 28px;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.06));
+    background-color: var(--panel-bg, rgba(26, 22, 18, 0.8));
+    background-image: var(
+      --glass-spot,
+      radial-gradient(60% 55% at 50% 22px, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 42%, transparent 72%)
+    );
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: var(--glass-highlight-soft, inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 46px rgba(255, 255, 255, 0.015)),
+      var(--panel-shadow, 0 16px 34px -24px rgba(0, 0, 0, 0.55));
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+
+  /* reflexo diagonal — único evento que continua sendo "só de hover" (é uma
+     luz passando, não parte do acabamento fixo). Mesmo ::before de
+     .glass-btn/.btn-primary em ds.html, não é theme-gated lá. */
+  .toolkit-card::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    inset: -60% -80%;
+    background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.55) 50%, transparent 58%);
+    transform: translateX(-65%);
+    transition: transform 1s ease;
+    pointer-events: none;
+  }
+
+  /* destaque no hover: não "liga" vidro nenhum (já está sempre ligado), só
+     realça o card com leve elevação, sombra mais espalhada e borda um
+     pouco mais clara que o repouso */
+  @media (hover: hover) {
+    .toolkit-card:hover::before {
+      transform: translateX(65%);
+    }
+    .toolkit-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: var(--glass-highlight-soft, inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 46px rgba(255, 255, 255, 0.015)),
+        var(--panel-strong-shadow, 0 20px 48px -28px rgba(0, 0, 0, 0.65));
+    }
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+
+  .toolkit-card h3 {
+    margin: 0 0 18px;
+    font-size: 19px;
+  }
+
+  .chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    border: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--ink-900) 20%, transparent);
+    padding: 7px 13px;
+    border-radius: 999px;
+  }
+
+  /* ---------- Acessibilidade ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .toolkit-card::before {
+      transition: none;
+    }
+  }
+  /* (hover: none): nenhum dos seletores acima existe fora de
+     @media (hover: hover), então em touch os cards já ficam no estado
+     neutro por padrão — nada a mais pra desativar aqui. */
+</style>
+
+<script>
+  const eyebrow = document.getElementById('toolkit-eyebrow');
+  if (eyebrow) {
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            eyebrow.classList.add('is-revealed');
+            revealObserver.disconnect();
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    revealObserver.observe(eyebrow);
+  }
+</script>

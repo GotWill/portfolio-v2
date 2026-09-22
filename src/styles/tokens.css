@@ -1,0 +1,173 @@
+/*
+  Design tokens extraídos de ds.html (Design System).
+  Não duplique estes valores dentro de componentes — referencie sempre
+  as custom properties abaixo via var(--token).
+*/
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Fontes */
+  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+
+  /* Neutros — cream (tema escuro) */
+  --cream-50: #faf7f0;
+  --cream-100: #f5f1e8;
+  --cream-200: #ebe4d3;
+
+  /* Neutros — ink (tema escuro) */
+  --ink-50: #f5f0e8;
+  --ink-100: #d5c8b8;
+  --ink-200: #b9a99a;
+  --ink-300: #9f9089;
+  --ink-700: #2a2520;
+  --ink-800: #1a1612;
+  --ink-900: #0f0c09;
+  --ink-950: #0b0907;
+
+  /* Acento roxo — constante nos dois temas */
+  --roxo-100: #efe9f6;
+  --roxo-200: #d7c6e8;
+  --roxo-300: #b79fd1;
+  --roxo-400: #9679b0;
+  --roxo-500: #75588c;
+  --roxo-600: #5a4370;
+
+  --accent-200: var(--roxo-200);
+  --accent-300: var(--roxo-300);
+  --accent-400: var(--roxo-400);
+  --accent-500: var(--roxo-500);
+
+  /* Papel de fundo / camadas */
+  --bg: var(--ink-900);
+  --bg-soft: var(--ink-800);
+  --surface: var(--ink-700);
+  --text: var(--cream-100);
+  --text-soft: var(--ink-100);
+  --text-mute: var(--ink-200);
+  --border-soft: color-mix(in srgb, var(--ink-100) 16%, transparent);
+  --border-strong: color-mix(in srgb, var(--ink-100) 30%, transparent);
+
+  --wash-bg: radial-gradient(
+      ellipse at 50% 0%,
+      color-mix(in srgb, var(--roxo-500) 13%, transparent) 0%,
+      color-mix(in srgb, var(--ink-800) 42%, transparent) 34%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--ink-900) 0%, var(--ink-950) 100%);
+
+  --panel-bg: color-mix(in srgb, var(--ink-800) 68%, transparent);
+  --panel-border: color-mix(in srgb, var(--ink-100) 13%, transparent);
+  --panel-shadow: 0 1px 0 color-mix(in srgb, var(--cream-100) 8%, transparent) inset,
+    0 16px 34px -24px #000000b8;
+  --paper-shadow: 0 1px 0 color-mix(in srgb, var(--cream-100) 10%, transparent) inset,
+    0 18px 42px -28px #000c, 0 32px 70px -44px #000000b8;
+
+  --pill-bg: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ink-700) 86%, transparent) 0%,
+    color-mix(in srgb, var(--ink-900) 78%, transparent) 100%
+  );
+  --pill-shadow: 0 1px 0 color-mix(in srgb, var(--cream-100) 10%, transparent) inset,
+    0 12px 28px -18px #000000c7;
+  --panel-strong-shadow: 0 1px 0 color-mix(in srgb, var(--cream-100) 10%, transparent) inset,
+    0 20px 48px -28px #000000c7;
+  --modal-bg: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--ink-700) 96%, transparent) 0%,
+    color-mix(in srgb, var(--ink-800) 98%, transparent) 54%,
+    var(--ink-900) 100%
+  );
+  --modal-shadow: 0 1px 0 color-mix(in srgb, var(--cream-100) 10%, transparent) inset,
+    0 22px 56px -26px #000000b8, 0 40px 90px -44px #000c;
+
+  /* Vidro (ds.html, [data-theme="dark"]) — só existe no tema escuro lá,
+     mantido igual aqui. */
+  --glass-sheen: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 45%, rgba(255, 255, 255, 0) 62%);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 46px rgba(255, 255, 255, 0.025);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --cream-100: #2a2520;
+  --cream-200: #3f3830;
+
+  --ink-50: #ffffff;
+  --ink-100: #3f3830;
+  --ink-200: #5c5249;
+  --ink-300: #7a6c63;
+  --ink-700: #ebe4d3;
+  --ink-800: #f5f1e8;
+  --ink-900: #faf7f0;
+  --ink-950: #ffffff;
+
+  --border-soft: color-mix(in srgb, var(--ink-100) 12%, transparent);
+  --border-strong: color-mix(in srgb, var(--ink-100) 24%, transparent);
+
+  --wash-bg: radial-gradient(ellipse at 50% 18%, #fffbf4a8 0%, transparent 62%),
+    linear-gradient(180deg, #f5f1e8 0%, #ebe4d3 100%);
+
+  --panel-bg: #fffdf8b8;
+  --panel-border: #7a6c634d;
+  --panel-shadow: 0 1px 0 #fffc inset, 0 0 0 1px #7a6c630f, 0 14px 32px -24px #3c32284d;
+  --paper-shadow: 0 1px 0 #fffc inset, 0 0 0 1px #7a6c6312, 0 14px 36px -28px #3c32284d,
+    0 28px 64px -40px #3c32283d;
+
+  --pill-bg: linear-gradient(180deg, #faf7f0d9 0%, #ebe4d3bf 100%);
+  --pill-shadow: 0 1px 0 #ffffffb3 inset, 0 8px 24px -16px #3c322840;
+  --panel-strong-shadow: 0 1px 0 #ffffffd9 inset, 0 0 0 1px #7a6c6314, 0 18px 44px -28px #3c322857;
+  --modal-bg: linear-gradient(160deg, #efe6d8eb 0%, #f5f1e8f2 50%, #faf7f0fa 100%);
+  --modal-shadow: 0 1px 0 #ffffffb3 inset, 0 18px 48px -28px #3c322873, 0 36px 80px -42px #3c322866;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--wash-bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-serif);
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* Astro não escopa nomes de @keyframes — mantenha uma única definição aqui
+   e reutilize via animation: pulse-soft ... em qualquer componente. */
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

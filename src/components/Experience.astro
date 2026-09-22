@@ -1,0 +1,512 @@
+---
+// Seção "Experiência" — lista-resumo com âncoras no topo + blocos de
+// detalhe abaixo, cada um com numeral romano preso (sticky) na coluna
+// esquerda enquanto aquele bloco passa na tela. Tokens de ds.html; roxo-300
+// no lugar do "peach" da referência. Cada <section id="exp-N"> é seu
+// próprio grid container — é isso que faz o sticky "soltar" no fim de um
+// bloco e prender de novo no próximo, sem JS/IntersectionObserver nenhum.
+const summary = [
+  {
+    id: 'exp-1',
+    role: 'Full-Stack Developer',
+    company: 'Baiaku',
+    description: 'Sites institucionais com foco em performance e SEO · dashboards em Looker Studio',
+    period: 'NOV 2023 A JAN 2026',
+  },
+  {
+    id: 'exp-2',
+    role: 'Front-End Developer',
+    company: 'RT Publicity',
+    description: 'Sistemas web sob medida · e-commerces em Tray, Yampi e Irroba',
+    period: 'NOV 2021 A JUN 2023',
+  },
+];
+
+const details = [
+  {
+    id: 'exp-1',
+    numeral: 'I',
+    period: 'NOV 2023 A JAN 2026',
+    role: 'Full-Stack Developer',
+    company: 'Baiaku',
+    paragraph:
+      'Atuei no desenvolvimento full-stack de sites institucionais e sistemas internos, sempre com foco em performance e SEO — da estrutura do back-end até os detalhes de como a página carrega e é encontrada. Também construí dashboards interativos com Looker Studio, transformando dado bruto em painéis que times não técnicos conseguiam usar sozinhos.',
+    cards: [
+      {
+        label: 'SITES INSTITUCIONAIS',
+        title: 'Performance e SEO como parte do escopo, não um retrabalho depois.',
+        text: 'Cada site já nascia pensado pra carregar rápido e ser indexado direito.',
+      },
+      {
+        label: 'DASHBOARDS DE DADOS',
+        title: 'Looker Studio virando decisão, não só gráfico bonito.',
+        text: 'Painéis que davam autonomia pro time olhar os números sem depender de relatório manual.',
+      },
+    ],
+  },
+  {
+    id: 'exp-2',
+    numeral: 'II',
+    period: 'NOV 2021 A JUN 2023',
+    role: 'Front-End Developer',
+    company: 'RT Publicity',
+    paragraph:
+      'Desenvolvi sistemas web em PHP, HTML, CSS e JavaScript pra demandas internas e de clientes, além de lojas virtuais completas usando plataformas como Tray, Yampi e Irroba — do catálogo ao checkout.',
+    cards: [
+      {
+        label: 'SISTEMAS SOB MEDIDA',
+        title: 'Ferramentas feitas pro problema real do time, não um genérico de prateleira.',
+        text: 'Sistemas construídos direto pra demanda do cliente ou da própria agência.',
+      },
+      {
+        label: 'E-COMMERCE',
+        title: 'Loja virtual funcionando de ponta a ponta, não só vitrine.',
+        text: 'Implementação completa em Tray, Yampi e Irroba — configuração até checkout de verdade.',
+      },
+    ],
+  },
+];
+---
+
+<section class="experience" id="experiencia">
+  <div class="container">
+    <div class="eyebrow" id="experience-eyebrow">
+      <span class="index">02</span>
+      <span class="rule"></span>
+      <span class="label">Experiência</span>
+    </div>
+
+    <h2>Quatro anos <em>entre sites institucionais, sistemas sob medida e e-commerce.</em></h2>
+
+    <ul class="summary-list">
+      {
+        summary.map((item) => (
+          <li>
+            <a class="summary-item" href={`#${item.id}`}>
+              <div class="summary-main">
+                <span class="role">{item.role}</span>
+                <span class="meta">
+                  {item.company} · {item.description}
+                </span>
+              </div>
+              <span class="period">{item.period}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="detail-list">
+      {
+        details.map((item) => (
+          <section class="detail" id={item.id}>
+            <div class="detail-left">
+              <div class="detail-sticky">
+                <span class="numeral">{item.numeral}</span>
+                <span class="detail-period">{item.period}</span>
+              </div>
+            </div>
+
+            <div class="detail-right">
+              <h3>{item.role}</h3>
+              <p class="company">{item.company}</p>
+              <p class="paragraph">{item.paragraph}</p>
+
+              <div class="cards">
+                {item.cards.map((card) => (
+                  <div class="card">
+                    <span class="card-label">{card.label}</span>
+                    <h4>{card.title}</h4>
+                    <p>{card.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .experience {
+    padding: 88px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  @media (min-width: 768px) {
+    .container {
+      padding: 0 40px;
+    }
+  }
+
+  /* Eyebrow */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent-300);
+  }
+  .eyebrow .rule {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--ink-200), transparent);
+    position: relative;
+    overflow: visible;
+    transform-origin: 0;
+  }
+
+  /* estado inicial (antes do reveal): linha invisível/colapsada — só sob
+     no-preference, pra reduced motion nunca ficar presa em opacity:0
+     esperando uma animação que não vai rodar */
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow .rule {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+  }
+
+  .eyebrow .rule::before,
+  .eyebrow .rule::after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* rastro de luz atrás do pontinho */
+  .eyebrow .rule::before {
+    inset: -1px 0;
+    transform-origin: 0;
+    background: linear-gradient(
+      270deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cream-100) 30%, transparent) 24%,
+      var(--accent-300) 68%,
+      var(--cream-100) 100%
+    );
+  }
+
+  /* pontinho brilhante (a "estrela cadente" em si) */
+  .eyebrow .rule::after {
+    top: 50%;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--cream-100);
+    transform: translate(-50%, -50%) scale(0.55);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-300) 70%, transparent),
+      0 0 18px color-mix(in srgb, var(--cream-100) 35%, transparent);
+  }
+
+  /* dispara quando .is-revealed é adicionada via JS (IntersectionObserver) */
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow.is-revealed .rule {
+      animation: chapter-rule-settle 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::before {
+      animation: chapter-rule-sweep 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::after {
+      animation: chapter-rule-burst 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+
+  @keyframes chapter-rule-settle {
+    0% {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    56% {
+      opacity: 0.9;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes chapter-rule-sweep {
+    0% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(-72%) scaleX(0.18);
+    }
+    14% {
+      opacity: 0.85;
+    }
+    58% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-300) 55%, transparent));
+      transform: translateX(18%) scaleX(0.92);
+    }
+    100% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(88%) scaleX(0.2);
+    }
+  }
+  @keyframes chapter-rule-burst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.45);
+    }
+    16% {
+      opacity: 1;
+      transform: translate(10px, -50%) scale(0.8);
+    }
+    58% {
+      opacity: 1;
+      transform: translate(76px, -50%) scale(1.15);
+    }
+    78% {
+      opacity: 0.36;
+      transform: translate(94px, -50%) scale(1.7);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(104px, -50%) scale(2.05);
+    }
+  }
+
+  h2 {
+    font-size: clamp(32px, 5.4vw, 64px);
+    line-height: 1.16;
+    max-width: 30ch;
+    margin: 0 0 56px;
+  }
+  h2 em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-300);
+  }
+
+  /* Lista-resumo */
+  .summary-list {
+    list-style: none;
+    margin: 0 0 72px;
+    padding: 0;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .summary-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 12px;
+    border-bottom: 1px solid var(--border-soft);
+    border-left: 2px solid transparent;
+    text-decoration: none;
+    transition: border-color 0.25s ease, padding-left 0.25s ease, background 0.25s ease;
+  }
+  .summary-item:hover,
+  .summary-item:focus-visible {
+    border-left-color: var(--accent-300);
+    padding-left: 22px;
+    background: var(--panel-bg);
+  }
+  .summary-item:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: -2px;
+  }
+
+  .summary-main {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .summary-item .role {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--text);
+    transition: color 0.25s ease;
+  }
+  .summary-item:hover .role,
+  .summary-item:focus-visible .role {
+    color: var(--accent-300);
+  }
+
+  .summary-item .meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--text-mute);
+  }
+
+  .summary-item .period {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .summary-item {
+      flex-wrap: wrap;
+    }
+    .summary-item .period {
+      order: 3;
+      width: 100%;
+    }
+  }
+
+  /* Blocos de detalhe */
+  .detail-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detail {
+    display: grid;
+    grid-template-columns: 1fr 2.6fr;
+    gap: 48px;
+    padding: 56px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+  .detail:last-child {
+    padding-bottom: 0;
+  }
+
+  .detail-sticky {
+    position: sticky;
+    top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .numeral {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(3.5rem, 6vw, 5rem);
+    line-height: 1;
+    color: var(--accent-300);
+  }
+
+  .detail-period {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+
+  .detail-right h3 {
+    margin: 0 0 8px;
+    font-size: clamp(24px, 3vw, 32px);
+  }
+
+  .detail-right .company {
+    margin: 0 0 24px;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 19px;
+    color: var(--accent-300);
+  }
+
+  .paragraph {
+    margin: 0 0 40px;
+    max-width: 62ch;
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text-soft);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .card {
+    padding: 22px;
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    background: var(--panel-bg);
+  }
+
+  .card-label {
+    display: block;
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+
+  .card h4 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .card p {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-soft);
+  }
+
+  @media (max-width: 860px) {
+    .detail {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .detail-sticky {
+      position: static;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 16px;
+    }
+    .numeral {
+      font-size: 2.5rem;
+    }
+    .cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const eyebrow = document.getElementById('experience-eyebrow');
+
+  if (eyebrow) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            eyebrow.classList.add('is-revealed');
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(eyebrow);
+  }
+</script>

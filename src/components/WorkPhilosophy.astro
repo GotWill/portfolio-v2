@@ -1,0 +1,330 @@
+---
+// Seção "Como eu trabalho" — eyebrow numerado, headline com destaque em
+// itálico (roxo-300, não peach) e marquee de stack. Tokens reaproveitados
+// de ds.html; nada de cor/fonte/espaçamento inventado.
+// Nota: a referência visual também trazia um nav numérico vertical (00-06)
+// na lateral esquerda e um selo vertical "W. / Nominee" na direita — os
+// dois foram propositalmente deixados de fora, não fizeram parte deste
+// pedido.
+const stackItems = [
+  { text: 'React · Next.js', highlight: true },
+  { text: 'Node' },
+  { text: 'WordPress' },
+  { text: 'PostgreSQL' },
+  { text: 'Full-stack com foco em front-end' },
+  { text: 'Testes' },
+];
+---
+
+<section class="work-philosophy" id="como-eu-trabalho">
+  <div class="container">
+    <div class="eyebrow" id="work-eyebrow">
+      <span class="index">01</span>
+      <span class="rule"></span>
+      <span class="label">Como eu trabalho</span>
+    </div>
+
+    <h2>
+      Um desenvolvedor <em>que trata interface como parte do problema, não como enfeite no final.</em>
+    </h2>
+
+    <hr class="divider" />
+
+    <div class="marquee-row">
+      <span class="marquee-label">→ Stack atual</span>
+      <div class="marquee-viewport">
+        <div class="marquee-track">
+          <div class="marquee-copy">
+            {
+              stackItems.map((item) => (
+                <>
+                  <span class:list={['item', { highlight: item.highlight }]}>{item.text}</span>
+                  <span class="sep" aria-hidden="true">·</span>
+                </>
+              ))
+            }
+          </div>
+          <div class="marquee-copy" aria-hidden="true">
+            {
+              stackItems.map((item) => (
+                <>
+                  <span class:list={['item', { highlight: item.highlight }]}>{item.text}</span>
+                  <span class="sep" aria-hidden="true">·</span>
+                </>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .work-philosophy {
+    padding: 88px 0;
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  @media (min-width: 768px) {
+    .container {
+      padding: 0 40px;
+    }
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent-300);
+  }
+  .eyebrow .rule {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--ink-200), transparent);
+    position: relative;
+    overflow: visible;
+    transform-origin: 0;
+  }
+
+  /* estado inicial (antes do reveal): linha invisível/colapsada — só sob
+     no-preference, pra reduced motion nunca ficar presa em opacity:0
+     esperando uma animação que não vai rodar */
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow .rule {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+  }
+
+  .eyebrow .rule::before,
+  .eyebrow .rule::after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* rastro de luz atrás do pontinho */
+  .eyebrow .rule::before {
+    inset: -1px 0;
+    transform-origin: 0;
+    background: linear-gradient(
+      270deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cream-100) 30%, transparent) 24%,
+      var(--accent-300) 68%,
+      var(--cream-100) 100%
+    );
+  }
+
+  /* pontinho brilhante (a "estrela cadente" em si) */
+  .eyebrow .rule::after {
+    top: 50%;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--cream-100);
+    transform: translate(-50%, -50%) scale(0.55);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-300) 70%, transparent),
+      0 0 18px color-mix(in srgb, var(--cream-100) 35%, transparent);
+  }
+
+  /* dispara quando .is-revealed é adicionada via JS (IntersectionObserver) */
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow.is-revealed .rule {
+      animation: chapter-rule-settle 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::before {
+      animation: chapter-rule-sweep 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::after {
+      animation: chapter-rule-burst 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+
+  @keyframes chapter-rule-settle {
+    0% {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    56% {
+      opacity: 0.9;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes chapter-rule-sweep {
+    0% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(-72%) scaleX(0.18);
+    }
+    14% {
+      opacity: 0.85;
+    }
+    58% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-300) 55%, transparent));
+      transform: translateX(18%) scaleX(0.92);
+    }
+    100% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(88%) scaleX(0.2);
+    }
+  }
+  @keyframes chapter-rule-burst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.45);
+    }
+    16% {
+      opacity: 1;
+      transform: translate(10px, -50%) scale(0.8);
+    }
+    58% {
+      opacity: 1;
+      transform: translate(76px, -50%) scale(1.15);
+    }
+    78% {
+      opacity: 0.36;
+      transform: translate(94px, -50%) scale(1.7);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(104px, -50%) scale(2.05);
+    }
+  }
+
+  h2 {
+    font-size: clamp(32px, 5.4vw, 64px);
+    line-height: 1.16;
+    max-width: 26ch;
+  }
+  h2 em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-300);
+  }
+
+  .divider {
+    margin: 48px 0 0;
+    border: none;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .marquee-row {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding-top: 22px;
+  }
+  .marquee-label {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    white-space: nowrap;
+  }
+
+  .marquee-viewport {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 26s linear infinite;
+  }
+  .marquee-row:hover .marquee-track,
+  .marquee-row:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+  .marquee-copy {
+    display: flex;
+    align-items: center;
+    flex: none;
+  }
+
+  .item {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    white-space: nowrap;
+    padding: 0 18px;
+  }
+  .item.highlight {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-soft);
+  }
+  .sep {
+    color: var(--text-mute);
+    font-size: 12px;
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+    }
+    .marquee-viewport {
+      overflow-x: auto;
+    }
+    .marquee-copy[aria-hidden='true'] {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const eyebrow = document.getElementById('work-eyebrow');
+
+  if (eyebrow) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            eyebrow.classList.add('is-revealed');
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(eyebrow);
+  }
+</script>

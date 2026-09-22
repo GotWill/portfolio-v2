@@ -1,0 +1,38 @@
+/*
+  CSS global de verdade — não component-scoped. Regras ::view-transition-*
+  são renderizadas na raiz do documento pelo navegador (fora da árvore de
+  qualquer componente), então o escopo automático do Astro nunca as
+  alcançaria se estivessem dentro do <style> de um .astro. Por isso vivem
+  aqui, importadas uma única vez no Layout base.
+*/
+
+/* Desliga o crossfade padrão da View Transitions API — o corte diagonal
+   autoral (ver ThemeToggle.astro) assume o controle da animação via
+   document.documentElement.animate(...) com pseudoElement. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+::view-transition-old(root) {
+  z-index: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* remove as setas de incremento/decremento da barra de rolagem no
+   Chrome/Edge (WebKit) — Firefox não renderiza esses botões nas versões
+   modernas, então não precisa de tratamento extra lá */
+::-webkit-scrollbar-button {
+  display: none;
+}

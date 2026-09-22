@@ -1,0 +1,129 @@
+---
+// Assinatura final — última seção do site. "WPcode" em escala gigante com
+// spotlight que segue o cursor revelando o acento roxo por baixo do texto
+// padrão (duas <span> sobrepostas: base sólida + accent com gradiente
+// roxo mascarado por um radial-gradient posicionado via --mx/--my).
+// Fonte carregada (ver Layout.astro) só vai até weight 700 — não existe
+// 800/900 do Archivo no <link> do Google Fonts, então usamos 700 (o mais
+// pesado disponível de verdade, sem o navegador sintetizar um bold falso).
+---
+
+<section class="signature" id="signature-fold">
+  <div class="signature-inner">
+    <span class="signature-text signature-base" aria-hidden="true">WPcode</span>
+    <span class="signature-text signature-accent" aria-hidden="true">WPcode</span>
+    <h2 class="sr-only">WPcode</h2>
+  </div>
+</section>
+
+<style>
+  .signature {
+    position: relative;
+    min-height: 60vh;
+    display: grid;
+    place-items: center;
+    padding: 80px 24px;
+    overflow: hidden;
+    overflow-x: hidden;
+  }
+  /* no mobile o texto some (clamp bate no mínimo de 72px), então os 60vh +
+     80px de padding herdados do desktop sobram muito espaço vazio acima e
+     abaixo — reduz pra caber justo ao redor do texto */
+  @media (max-width: 640px) {
+    .signature {
+      min-height: 0;
+      padding: 40px 20px;
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .signature-inner {
+    position: relative;
+    --mx: 50%;
+    --my: 50%;
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .signature-inner.is-revealed {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .signature-text {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(72px, 17vw, 260px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .signature-base {
+    color: var(--text);
+  }
+
+  .signature-accent {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, var(--roxo-300, #b79fd1), var(--roxo-500, #75588c));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0;
+    -webkit-mask-image: radial-gradient(circle 220px at var(--mx) var(--my), black 0%, transparent 70%);
+    mask-image: radial-gradient(circle 220px at var(--mx) var(--my), black 0%, transparent 70%);
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .signature-inner:hover .signature-accent {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .signature-inner {
+      transition: opacity 0.4s ease;
+      transform: none;
+    }
+    .signature-accent {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('.signature-inner');
+  if (wrap) {
+    wrap.addEventListener('mousemove', (e) => {
+      const rect = wrap.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      wrap.style.setProperty('--mx', `${x}%`);
+      wrap.style.setProperty('--my', `${y}%`);
+    });
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          wrap.classList.add('is-revealed');
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(wrap);
+  }
+</script>

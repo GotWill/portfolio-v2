@@ -1,11 +1,34 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import ThemeToggle from '../components/ThemeToggle.astro';
+import ScrollHero from '../components/ScrollHero.astro';
+import StatusStrip from '../components/StatusStrip.astro';
+import WorkPhilosophy from '../components/WorkPhilosophy.astro';
+import Experience from '../components/Experience.astro';
+import ScrollStack from '../components/ScrollStack.astro';
+import Toolkit from '../components/Toolkit.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import NavRail from '../components/NavRail.astro';
+import AudioWidget from '../components/AudioWidget.astro';
+import Signature from '../components/Signature.astro';
+import BackToTop from '../components/BackToTop.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
 ---
 
 <Layout>
-	<Welcome />
+	<ThemeToggle />
+	<WhatsAppButton />
+	<NavRail />
+	<AudioWidget />
+	<BackToTop />
+	<ScrollHero />
+	<StatusStrip />
+	<WorkPhilosophy />
+	<About />
+	<Experience />
+	<ScrollStack />
+	<Toolkit />
+	<Contact />
+	<Signature />
 </Layout>

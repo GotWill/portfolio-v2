@@ -1,0 +1,1080 @@
+---
+// Seção "Projetos" — pilha vertical no scroll, porte do componente
+// "ScrollStack" (React Bits) pra Astro + TS vanilla + Lenis, sem React:
+// useRef/useLayoutEffect/useCallback viram variáveis de módulo comuns e
+// funções chamadas num <script>; cardsRef.current vira
+// document.querySelectorAll; lastTransformsRef vira um Map de módulo com a
+// mesma lógica de hasChanged pra não escrever style à toa.
+import GlassButton from './GlassButton.astro';
+
+interface Project {
+  title: string;
+  cover: string;
+  tags: string[];
+  description: string;
+  demoUrl?: string;
+  githubUrl?: string;
+}
+
+interface Props {
+  /** Se omitido, usa os 4 projetos reais abaixo. */
+  projects?: Project[];
+}
+
+const defaultProjects: Project[] = [
+  {
+    title: 'Rick And Morty',
+    cover: '/projects/rick-and-morty.webp',
+    tags: ['React', 'styled-components', 'axios', 'context api'],
+    description:
+      'Aplicação interativa que consome a API oficial de Rick and Morty para listar, favoritar e explorar detalhes de personagens, episódios e localizações. Conta com um sistema avançado de filtragem multi-critério por nome, espécie e gênero, focado em alta performance e experiência de busca fluida.',
+    demoUrl: 'https://rick-and-morty-gotwill.vercel.app/',
+    githubUrl: 'https://github.com/GotWill/rick-and-morty',
+  },
+  {
+    title: 'IMC',
+    cover: '/projects/imc.webp',
+    tags: ['React'],
+    description:
+      'Uma aplicação simples e responsiva desenvolvida em React para o cálculo do Índice de Massa Corporal (IMC). O projeto recebe o peso e a altura do usuário, realiza o cálculo em tempo real e exibe a classificação da OMS (Abaixo do peso, Peso normal, Sobrepeso, etc.) de forma visual e intuitiva.',
+    demoUrl: 'https://react-calc-imc-gotwill.vercel.app/',
+    githubUrl: 'https://github.com/GotWill/react_calc_imc',
+  },
+  {
+    title: 'Luxe Store',
+    cover: '/projects/luxe-store.webp',
+    tags: [
+      'React',
+      'shadcn/ui',
+      'Zustand',
+      'Firebase',
+      'Testes Unitários',
+      'Testes End-to-End (E2E)',
+      'Playwright',
+    ],
+    description:
+      'A Luxe Store é uma plataforma de e-commerce moderna e responsiva projetada para oferecer uma experiência de compra fluida, segura e intuitiva. A aplicação cobre desde a descoberta de produtos até a etapa final de conversão, integrando fluxos complexos de autenticação, gestão de dados do usuário e checkout.',
+    demoUrl: 'https://store-react-sage.vercel.app/',
+    githubUrl: 'https://github.com/GotWill/store-react',
+  },
+  {
+    title: 'Weather Analytics',
+    cover: '/projects/weather.webp',
+    tags: [
+      'Python',
+      'Go',
+      'NestJS',
+      'React',
+      'RabbitMQ',
+      'Docker',
+      'Docker Compose',
+      'Open-Meteo API',
+      'Gemini API',
+      'Shadcn UI',
+      'TypeScript',
+      'JavaScript',
+      'CSV / XLSX Export',
+    ],
+    description:
+      'O Weather Analytics é um projeto de ponta a ponta focado em coletar, processar e analisar dados climáticos utilizando microsserviços e mensageria. A arquitetura roda inteiramente em Docker dividida em 5 containers, onde um script em Python busca dados meteorológicos de uma API a cada hora e os envia para uma fila do RabbitMQ. Na sequência, um worker em Go — focado em performance — consome essa fila, valida o payload e encaminha as informações para o backend.\n\nEssa camada de backend, desenvolvida em NestJS, cuida de toda a parte de autenticação e usuários, armazena os dados, gera relatórios para exportação em CSV e Excel, e ainda se conecta com a IA do Gemini para gerar insights automáticos sobre as tendências do tempo. Por fim, um front-end em React que consome toda essa estrutura e apresenta os dados em um dashboard interativo com gráficos e tabelas em tempo real.',
+    githubUrl: 'https://github.com/GotWill/weather/tree/feature/weather-analytics',
+  },
+];
+
+const { projects = defaultProjects } = Astro.props;
+---
+
+<section class="projects" id="projetos">
+  <div class="container">
+    <div class="eyebrow" id="projects-eyebrow">
+      <span class="index">03</span>
+      <span class="rule"></span>
+      <span class="label">Projetos</span>
+    </div>
+
+    <h2>Projetos <em>que fiz questão de terminar.</em></h2>
+  </div>
+
+  <div class="scroll-stack">
+    <div class="scroll-stack-inner">
+      {
+        projects.map((p, i) => (
+          <article class="scroll-stack-card" data-index={i}>
+            <div class="cover">
+              <img
+                src={p.cover}
+                alt={`Captura de tela do projeto ${p.title}`}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="stack-body">
+              <h3>{p.title}</h3>
+              <div class="tag-list">
+                {p.tags.map((tag) => (
+                  <span class="chip">{tag}</span>
+                ))}
+              </div>
+              <p class="description">{p.description}</p>
+              <div class="card-actions">
+                {p.demoUrl && (
+                  <GlassButton href={p.demoUrl} variant="primary" class="card-action-link">
+                    Demo
+                  </GlassButton>
+                )}
+                {p.githubUrl && (
+                  <GlassButton href={p.githubUrl} variant="outline" class="card-action-link">
+                    Ver no GitHub
+                  </GlassButton>
+                )}
+                <button
+                  type="button"
+                  class="see-more"
+                  aria-haspopup="dialog"
+                  data-title={p.title}
+                  data-cover={p.cover}
+                  data-tags={JSON.stringify(p.tags)}
+                  data-description={p.description}
+                  data-demo-url={p.demoUrl ?? ''}
+                  data-github-url={p.githubUrl ?? ''}
+                >
+                  Ver mais
+                </button>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+    <div class="scroll-stack-end" />
+  </div>
+
+  <!-- Alcançável só em desktop: o botão .see-more que dispara showModal()
+       fica com display:none no mobile (ver <style>), então o dialog nunca
+       é aberto lá — conteúdo populado via JS a partir do dataset do botão
+       clicado, não precisa de uma cópia por card. -->
+  <dialog id="project-modal" class="project-modal">
+    <div class="project-modal-inner">
+      <button type="button" class="project-modal-close" aria-label="Fechar">✕</button>
+      <div class="project-modal-cover">
+        <img id="project-modal-cover-img" src="" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="stack-body">
+        <h3 id="project-modal-title"></h3>
+        <div class="modal-tags" id="project-modal-tags"></div>
+        <p class="description" id="project-modal-description"></p>
+        <div class="actions">
+          <GlassButton id="project-modal-demo" href="#" variant="primary">
+            Demo
+          </GlassButton>
+          <GlassButton id="project-modal-github" href="#" variant="outline">
+            Ver no GitHub
+          </GlassButton>
+        </div>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<style>
+  .projects {
+    padding: 88px 0;
+    border-top: 1px solid var(--border-soft);
+    /* isolation:isolate sozinho já cria um novo contexto de empilhamento
+       pra essa seção inteira — não precisa de position pra isso. O
+       "position:relative + z-index:0" que existia aqui antes era o
+       clássico truque de contenção de stacking context, mas ironicamente
+       era a CAUSA da seção inteira pintar por cima de tudo que vem depois
+       dela no documento (independente de sobreposição real de espaço de
+       scroll) — não a proteção contra isso. */
+    isolation: isolate;
+  }
+  /* padding-bottom:88px do desktop fica intacto — o buffer derivado em
+     measureAndSetSpacing() já resolve a sobreposição matematicamente lá.
+     Zerado só no mobile, breakpoint validado no navegador. */
+  @media (max-width: 768px) {
+    .projects {
+      padding-bottom: 0;
+    }
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  @media (min-width: 768px) {
+    .container {
+      padding: 0 40px;
+    }
+  }
+
+  /* Eyebrow — mesmo padrão animado (estrela cadente) das outras seções */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent-300);
+  }
+  .eyebrow .rule {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--ink-200), transparent);
+    position: relative;
+    overflow: visible;
+    transform-origin: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow .rule {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+  }
+  .eyebrow .rule::before,
+  .eyebrow .rule::after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .eyebrow .rule::before {
+    inset: -1px 0;
+    transform-origin: 0;
+    background: linear-gradient(
+      270deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cream-100) 30%, transparent) 24%,
+      var(--accent-300) 68%,
+      var(--cream-100) 100%
+    );
+  }
+  .eyebrow .rule::after {
+    top: 50%;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--cream-100);
+    transform: translate(-50%, -50%) scale(0.55);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-300) 70%, transparent),
+      0 0 18px color-mix(in srgb, var(--cream-100) 35%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow.is-revealed .rule {
+      animation: chapter-rule-settle 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::before {
+      animation: chapter-rule-sweep 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .eyebrow.is-revealed .rule::after {
+      animation: chapter-rule-burst 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+  @keyframes chapter-rule-settle {
+    0% {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    56% {
+      opacity: 0.9;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes chapter-rule-sweep {
+    0% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(-72%) scaleX(0.18);
+    }
+    14% {
+      opacity: 0.85;
+    }
+    58% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-300) 55%, transparent));
+      transform: translateX(18%) scaleX(0.92);
+    }
+    100% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(88%) scaleX(0.2);
+    }
+  }
+  @keyframes chapter-rule-burst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.45);
+    }
+    16% {
+      opacity: 1;
+      transform: translate(10px, -50%) scale(0.8);
+    }
+    58% {
+      opacity: 1;
+      transform: translate(76px, -50%) scale(1.15);
+    }
+    78% {
+      opacity: 0.36;
+      transform: translate(94px, -50%) scale(1.7);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(104px, -50%) scale(2.05);
+    }
+  }
+
+  h2 {
+    margin: 0 0 56px;
+    font-size: clamp(32px, 5.4vw, 56px);
+    line-height: 1.16;
+    max-width: 22ch;
+  }
+  h2 em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-300);
+  }
+
+  /* ---------- Stack ---------- */
+  .scroll-stack-inner {
+    padding: 0 20px;
+  }
+  @media (min-width: 768px) {
+    .scroll-stack-inner {
+      padding: 0 40px;
+    }
+  }
+
+  .scroll-stack-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: min(900px, 92vw);
+    margin-inline: auto;
+    /* altura intrínseca (definida pelo conteúdo) — nada de min-height fixo,
+       que era o que dava a silhueta quadrada com o conteúdo empilhado */
+    min-height: 0;
+    padding: 2rem;
+    border-radius: 20px;
+    /* mesmo acabamento de vidro do resto do sistema — var() com fallback
+       embutido: --glass-sheen/--glass-border/--glass-highlight só existem
+       no tema escuro em tokens.css, então no tema claro o fallback literal
+       entra sozinho sem precisar de um seletor [data-theme='dark'] à parte */
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    background-color: var(--panel-bg, rgba(26, 22, 18, 0.8));
+    background-image: var(--glass-sheen, none);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: var(--glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 46px rgba(255, 255, 255, 0.025)),
+      var(--panel-shadow, 0 16px 34px -24px rgba(0, 0, 0, 0.55));
+  }
+
+  .scroll-stack-card .cover {
+    border-radius: 18px;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--ink-800);
+  }
+  .scroll-stack-card .cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* "Ver mais" mora no mesmo wrapper de Demo/GitHub — visível sempre,
+     mobile e desktop: a descrição trunca em 4 linhas nos dois, os links
+     reais ficam ocultos no card nos dois, o modal recria Demo/GitHub lá
+     dentro. Estilizado pra ocupar o mesmo espaço/altura do .glass-btn
+     variant="outline" ao lado dele. */
+  .see-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 24px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    cursor: pointer;
+    transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease,
+      backdrop-filter 0.5s ease, color 0.4s ease 0.05s;
+  }
+  .see-more:hover,
+  .see-more:focus-visible {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.02) 55%),
+      color-mix(in srgb, var(--accent-400) 18%, transparent);
+    border-color: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 10px 30px -16px color-mix(in srgb, var(--accent-500) 45%, transparent);
+  }
+  .see-more:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 4px;
+  }
+
+  /* Truncamento + "Ver mais" + Demo/GitHub ocultos no card: vale SEMPRE
+     agora, mobile e desktop — não é mais exclusivo de desktop (ver blocos
+     logo abaixo). Só o LAYOUT de colunas continua responsivo: abaixo de
+     769px o card fica em coluna única (definido acima), a partir daqui
+     vira grid de 2 colunas. */
+  @media (min-width: 769px) {
+    .scroll-stack-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: center;
+      max-width: min(1100px, 92vw);
+      padding: 2.5rem;
+    }
+    .scroll-stack-card .cover {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  .scroll-stack-card .description {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* esconde QUALQUER coisa dentro de .card-actions que não seja o "Ver
+     mais" (Demo, GitHub, ou qualquer botão futuro que entre ali) — à
+     prova de falha, não depende de uma classe extra ter sido aplicada
+     certinho em cada link; os links continuam existindo no HTML/dados, só
+     ficam ocultos aqui. :global() no filho é necessário porque Demo/GitHub
+     são renderizados pelo componente GlassButton: sem isso o Astro escopa
+     ":not(.see-more)" exigindo TAMBÉM o atributo de escopo do ScrollStack
+     no elemento, que um <a> vindo de outro componente nunca carrega — a
+     regra "escondia" um alvo que não existia e Demo/GitHub continuavam
+     visíveis. */
+  .card-actions > :global(:not(.see-more)) {
+    display: none;
+  }
+
+  .stack-body {
+    display: flex;
+    flex-direction: column;
+  }
+  .stack-body h3 {
+    margin: 0 0 16px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.75rem;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  /* só no card, só no mobile — o modal usa .modal-tags (classe diferente,
+     não afetada) e continua mostrando as tags de qualquer largura, já que
+     lá o usuário pediu explicitamente pra ver mais */
+  @media (max-width: 768px) {
+    .scroll-stack-card .tag-list {
+      display: none;
+    }
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    border: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--ink-900) 20%, transparent);
+    padding: 7px 13px;
+    border-radius: 999px;
+  }
+
+  .description {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-soft);
+  }
+
+  .card-actions,
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  /* GlassButton renderiza <a> quando recebe href — sem isso herdava o
+     sublinhado padrão de âncora do navegador (vale tanto pros cards quanto
+     pro modal, que usa o mesmo componente) */
+  .scroll-stack-card .card-actions :global(.glass-btn),
+  .project-modal .actions :global(.glass-btn) {
+    text-decoration: none;
+  }
+
+  /* spacer — buffer real de scroll (não só marcador de 1px): dá espaço
+     pro último card soltar o pin e sair de tela por completo ANTES da
+     próxima seção (Toolkit) chegar, evitando os dois se sobrepondo */
+  .scroll-stack-end {
+    width: 100%;
+    height: 30vh;
+  }
+
+  /* reduced motion: sem Lenis, sem transform algum aplicado via JS (ver
+     script) — aqui só garante que, mesmo que algo escreva um transform
+     antes de checarmos a preferência, ele não fique visível. */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-stack-card {
+      transform: none !important;
+      filter: none !important;
+    }
+  }
+
+  /* ---------- Modal "Ver mais" ---------- */
+  /* Correção garantida contra ocupar espaço no fluxo quando fechado,
+     independente de qualquer regra genérica que possa estar interferindo
+     — o comportamento padrão do navegador pra <dialog> sem o atributo
+     "open" já é display:none, mas !important aqui blinda contra qualquer
+     reset futuro que declare "dialog { display: ... }" sem o seletor
+     [open] junto. */
+  dialog.project-modal:not([open]) {
+    display: none !important;
+  }
+  .project-modal {
+    padding: 0;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    border-radius: 20px;
+    width: min(720px, 92vw);
+    max-height: min(88vh, 900px);
+    /* o <dialog> é o ÚNICO elemento com overflow — .project-modal-inner é
+       só o wrapper de padding, sem max-height/overflow próprio, pra não
+       competir com essa barra e não sobrar uma segunda dentro dela */
+    overflow-y: auto;
+    background-color: var(--panel-bg, rgba(26, 22, 18, 0.96));
+    background-image: var(--glass-sheen, none);
+    color: var(--text);
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6);
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-300) transparent;
+  }
+  .project-modal::backdrop {
+    background: rgba(10, 8, 6, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .project-modal::-webkit-scrollbar {
+    width: 8px;
+  }
+  .project-modal::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .project-modal::-webkit-scrollbar-thumb {
+    background-color: var(--accent-300);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .project-modal::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-200);
+  }
+  .project-modal-inner {
+    position: relative;
+    padding: 2.5rem;
+  }
+  .project-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    background: var(--panel-bg, rgba(0, 0, 0, 0.4));
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .project-modal-close:hover,
+  .project-modal-close:focus-visible {
+    color: var(--accent-300);
+    border-color: var(--accent-300);
+  }
+  .project-modal-cover {
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 24px;
+    background: var(--ink-800);
+  }
+  .project-modal-cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* \n\n nas descrições longas (ex.: Weather Analytics) só faz sentido como
+     quebra de parágrafo aqui, onde o texto vai inteiro — no card truncado
+     (4 linhas) essa quebra nem chega a aparecer */
+  .project-modal .description {
+    white-space: pre-line;
+  }
+
+  .modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  /* os chips aqui dentro são criados via document.createElement no script
+     (openProjectModal), não pelo template estático — não recebem o
+     atributo de escopo do Astro, então a regra scoped normal (tipo
+     ".chip { ... }") nunca bateria neles. :global() é necessário pra essa
+     declaração valer fora do template. */
+  :global(.modal-tags .tag-pill) {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--ink-700) 45%, transparent);
+    color: var(--ink-100);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 6px 13px;
+  }
+</style>
+
+<script>
+  import Lenis from 'lenis';
+
+  interface StackConfig {
+    itemDistance: number;
+    itemScale: number;
+    itemStackDistance: number;
+    stackPosition: string;
+    scaleEndPosition: string;
+    baseScale: number;
+    rotationAmount: number;
+    blurAmount: number;
+  }
+
+  const baseConfig: StackConfig = {
+    itemDistance: 120,
+    itemScale: 0.04,
+    itemStackDistance: 18,
+    stackPosition: '18%',
+    scaleEndPosition: '10%',
+    baseScale: 0.82,
+    rotationAmount: 0,
+    blurAmount: 0,
+  };
+
+  const MOBILE_BREAKPOINT = 640;
+
+  // itemScale/itemStackDistance reduzidos em telas estreitas — com os
+  // valores de desktop o efeito de pilha fica exagerado/confuso num card
+  // que já ocupa quase a largura toda da tela
+  function activeConfig(): StackConfig {
+    if (window.innerWidth <= MOBILE_BREAKPOINT) {
+      return {
+        ...baseConfig,
+        itemScale: baseConfig.itemScale * 0.5,
+        itemStackDistance: baseConfig.itemStackDistance * 0.6,
+      };
+    }
+    return baseConfig;
+  }
+
+  let cards: HTMLElement[] = [];
+  let endEl: HTMLElement | null = null;
+  const lastTransforms = new Map<number, { translateY: number; scale: number; rotation: number; blur: number }>();
+  let lenis: Lenis | null = null;
+  let rafId: number | null = null;
+  let isUpdating = false;
+  let resizeTimeoutId: number | null = null;
+
+  function calculateProgress(scrollTop: number, start: number, end: number): number {
+    if (scrollTop < start) return 0;
+    if (scrollTop > end) return 1;
+    return (scrollTop - start) / (end - start);
+  }
+
+  function parsePercentage(value: string | number, containerHeight: number): number {
+    if (typeof value === 'string' && value.includes('%')) {
+      return (parseFloat(value) / 100) * containerHeight;
+    }
+    return parseFloat(String(value));
+  }
+
+  function getScrollData() {
+    return { scrollTop: window.scrollY, containerHeight: window.innerHeight };
+  }
+
+  // offsetTop encadeado até a raiz — ao contrário de getBoundingClientRect(),
+  // não é afetado pelo transform que esta própria função ajuda a calcular
+  // (senão o transform do frame anterior entraria na medição do próximo,
+  // um loop de realimentação instável).
+  function getElementOffset(el: HTMLElement): number {
+    let offset = 0;
+    let node: HTMLElement | null = el;
+    while (node) {
+      offset += node.offsetTop;
+      node = node.offsetParent as HTMLElement | null;
+    }
+    return offset;
+  }
+
+  function updateCardTransforms() {
+    if (!cards.length || isUpdating) return;
+    isUpdating = true;
+
+    const cfg = activeConfig();
+    const { scrollTop, containerHeight } = getScrollData();
+    const stackPositionPx = parsePercentage(cfg.stackPosition, containerHeight);
+    const scaleEndPositionPx = parsePercentage(cfg.scaleEndPosition, containerHeight);
+    const endElementTop = endEl ? getElementOffset(endEl) : 0;
+
+    let topCardIndex = 0;
+    if (cfg.blurAmount) {
+      for (let j = 0; j < cards.length; j++) {
+        const jTop = getElementOffset(cards[j]);
+        const jTriggerStart = jTop - stackPositionPx - cfg.itemStackDistance * j;
+        if (scrollTop >= jTriggerStart) topCardIndex = j;
+      }
+    }
+
+    cards.forEach((card, i) => {
+      const cardTop = getElementOffset(card);
+      const triggerStart = cardTop - stackPositionPx - cfg.itemStackDistance * i;
+      const triggerEnd = cardTop - scaleEndPositionPx;
+      const pinStart = triggerStart;
+      const pinEnd = endElementTop - containerHeight / 2;
+
+      const scaleProgress = calculateProgress(scrollTop, triggerStart, triggerEnd);
+      const targetScale = cfg.baseScale + i * cfg.itemScale;
+      const scale = 1 - scaleProgress * (1 - targetScale);
+      const rotation = cfg.rotationAmount ? i * cfg.rotationAmount * scaleProgress : 0;
+
+      let blur = 0;
+      if (cfg.blurAmount && i < topCardIndex) {
+        blur = Math.max(0, (topCardIndex - i) * cfg.blurAmount);
+      }
+
+      let translateY = 0;
+      const isPinned = scrollTop >= pinStart && scrollTop <= pinEnd;
+      if (isPinned) {
+        translateY = scrollTop - cardTop + stackPositionPx + cfg.itemStackDistance * i;
+      } else if (scrollTop > pinEnd) {
+        translateY = pinEnd - cardTop + stackPositionPx + cfg.itemStackDistance * i;
+      }
+
+      const next = {
+        translateY: Math.round(translateY * 100) / 100,
+        scale: Math.round(scale * 1000) / 1000,
+        rotation: Math.round(rotation * 100) / 100,
+        blur: Math.round(blur * 100) / 100,
+      };
+
+      const prev = lastTransforms.get(i);
+      const hasChanged =
+        !prev ||
+        Math.abs(prev.translateY - next.translateY) > 0.1 ||
+        Math.abs(prev.scale - next.scale) > 0.001 ||
+        Math.abs(prev.rotation - next.rotation) > 0.1 ||
+        Math.abs(prev.blur - next.blur) > 0.1;
+
+      if (hasChanged) {
+        card.style.transform = `translate3d(0, ${next.translateY}px, 0) scale(${next.scale}) rotate(${next.rotation}deg)`;
+        card.style.filter = next.blur > 0 ? `blur(${next.blur}px)` : '';
+        lastTransforms.set(i, next);
+      }
+    });
+
+    isUpdating = false;
+  }
+
+  function raf(time: number) {
+    lenis?.raf(time);
+    rafId = requestAnimationFrame(raf);
+  }
+
+  // Espaçamento fixo (itemDistance) subestimava cards com mais conteúdo:
+  // o próximo card começava a subir por cima antes do texto terminar de
+  // ser lido. Aqui o gap e o buffer final escalam com a altura REAL
+  // renderizada de cada card (offsetHeight), medida depois do DOM já ter
+  // aplicado o layout novo — cardTop/offsetTop dos cards seguintes já
+  // refletem esse gap maior automaticamente, sem precisar tocar na
+  // fórmula de trigger/pin. Com a descrição agora truncada em 4 linhas em
+  // todo lugar (ver .see-more/modal), os cards ficaram bem mais uniformes
+  // em altura — não precisa mais reservar ~1 tela inteira de leitura por
+  // card, só um respiro proporcional ao conteúdo que sobrou visível.
+  function measureAndSetSpacing() {
+    if (!cards.length) return;
+    const cfg = activeConfig();
+
+    cards.forEach((card, i) => {
+      if (i < cards.length - 1) {
+        // itemStackDistance é subtraído no cálculo de triggerStart do PRÓXIMO
+        // card (ver updateCardTransforms) — sem somar de volta aqui, ele
+        // corrói o espaço que acabamos de reservar
+        const dynamicGap = Math.max(cfg.itemDistance, card.offsetHeight * 0.5) + cfg.itemStackDistance;
+        card.style.marginBottom = `${dynamicGap}px`;
+      }
+    });
+
+    // Buffer final derivado DIRETAMENTE da fórmula de translateY em
+    // updateCardTransforms, não mais aproximado por tentativa. No momento
+    // em que o pin solta (scrollTop == pinEnd), a posição do RODAPÉ do
+    // último card na página é:
+    //   cardTop + translateY + lastCard.offsetHeight
+    // Substituindo translateY pela fórmula do ramo "pinned" e pinEnd por
+    // (endElementTop - containerHeight/2), cardTop se cancela:
+    //   bottom = endElementTop - containerHeight/2 + stackPositionPx
+    //            + itemStackDistance*lastIndex + offsetHeight
+    // Queremos bottom <= endElementTop + endEl.height (não passar do FIM
+    // do spacer, onde o padding-bottom de .projects e depois o Toolkit
+    // começam). Isolando endEl.height:
+    //   endEl.height >= offsetHeight + stackPositionPx
+    //                    + itemStackDistance*lastIndex - containerHeight/2
+    // Esse é o mínimo que garante, por construção, que o rodapé do último
+    // card nunca ultrapassa o fim da seção — não uma aproximação.
+    const lastIndex = cards.length - 1;
+    const lastCard = cards[lastIndex];
+    if (endEl && lastCard) {
+      const stackPositionPx = parsePercentage(cfg.stackPosition, window.innerHeight);
+      const requiredBuffer = Math.max(
+        0,
+        lastCard.offsetHeight + stackPositionPx + cfg.itemStackDistance * lastIndex - window.innerHeight / 2
+      );
+      endEl.style.height = `${requiredBuffer}px`;
+    }
+  }
+
+  function onResize() {
+    updateCardTransforms();
+
+    // texto/tags quebram linha diferente com a janela redimensionada, o que
+    // muda offsetHeight — remedir a cada pixel do arraste seria caro, daí o
+    // debounce; o updateCardTransforms acima já mantém o pin responsivo
+    // enquanto o usuário ainda está arrastando a borda
+    if (resizeTimeoutId != null) window.clearTimeout(resizeTimeoutId);
+    resizeTimeoutId = window.setTimeout(() => {
+      measureAndSetSpacing();
+      updateCardTransforms();
+    }, 180);
+  }
+
+  function setup() {
+    const inner = document.querySelector('.scroll-stack-inner');
+    cards = inner ? Array.from(inner.querySelectorAll<HTMLElement>('.scroll-stack-card')) : [];
+    endEl = document.querySelector<HTMLElement>('.scroll-stack-end');
+    if (!cards.length) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    measureAndSetSpacing();
+
+    // a primeira medição roda antes das fontes customizadas (Archivo/
+    // Newsreader, ver Layout.astro) terminarem de carregar — se o
+    // navegador troca da fonte de fallback pra elas depois desse ponto
+    // (FOUT), a altura do h2/eyebrow muda e o topGap medido fica
+    // desatualizado (menor do que deveria). Remedir quando as fontes
+    // resolverem corrige isso sem precisar adivinhar o valor certo.
+    document.fonts?.ready.then(() => {
+      measureAndSetSpacing();
+      updateCardTransforms();
+    });
+
+    // reduced motion: scroll nativo do navegador, cards em fluxo normal,
+    // sem transform/scale/blur nenhum — para por aqui, não inicializa Lenis
+    if (reducedMotion) return;
+
+    cards.forEach((card) => {
+      card.style.willChange = 'transform, filter';
+      card.style.transformOrigin = 'top center';
+      card.style.backfaceVisibility = 'hidden';
+    });
+
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 2,
+      infinite: false,
+      wheelMultiplier: 1,
+      lerp: 0.1,
+      syncTouch: true,
+      syncTouchLerp: 0.075,
+      // metade "de dentro" do problema: o Lenis nunca intercepta wheel/scroll
+      // originado do <dialog> (ou de qualquer descendente dele), deixando o
+      // scroll nativo (overflow-y: auto já configurado nele) assumir sozinho
+      // — independe do estado de stop()/start(), que cuida da outra metade
+      // (congelar o ScrollStack de fundo enquanto o modal está aberto)
+      prevent: (node: Element) => node.closest('#project-modal') !== null,
+    });
+
+    lenis.on('scroll', updateCardTransforms);
+    rafId = requestAnimationFrame(raf);
+    updateCardTransforms();
+
+    // expõe a instância pro NavRail.astro (e qualquer outro componente que
+    // precise scrollar a página): este Lenis controla a janela inteira
+    // (sem wrapper/content), então um <a href="#id"> comum brigaria com
+    // ele — outros componentes devem chamar __lenis.scrollTo() em vez do
+    // scroll nativo do navegador.
+    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+
+    window.addEventListener('resize', onResize);
+  }
+
+  function teardown() {
+    if (rafId != null) cancelAnimationFrame(rafId);
+    rafId = null;
+    if (resizeTimeoutId != null) window.clearTimeout(resizeTimeoutId);
+    resizeTimeoutId = null;
+    lenis?.destroy();
+    lenis = null;
+    delete (window as unknown as { __lenis?: Lenis }).__lenis;
+    lastTransforms.clear();
+    window.removeEventListener('resize', onResize);
+  }
+
+  // Este projeto não usa <ClientRouter /> (SPA router do Astro) — é uma
+  // página só, e nenhum componente importa astro:transitions; o
+  // ThemeToggle usa document.startViewTransition (API nativa do browser
+  // pra uma transição na MESMA página), não o router do Astro. Os eventos
+  // astro:page-load/astro:before-swap só existem com o router ativo, e
+  // nunca disparariam aqui — por isso init roda direto, igual a todo outro
+  // <script> deste projeto (ThemeToggle, ScrollHero, Toolkit...). Se
+  // <ClientRouter /> entrar no projeto depois, troque as duas linhas
+  // abaixo por listeners de 'astro:page-load' (setup) e
+  // 'astro:before-swap' (teardown).
+  setup();
+
+  // eyebrow: mesmo reveal (estrela cadente) das outras seções
+  const eyebrow = document.getElementById('projects-eyebrow');
+  if (eyebrow) {
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            eyebrow.classList.add('is-revealed');
+            revealObserver.disconnect();
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    revealObserver.observe(eyebrow);
+  }
+
+  // Modal "Ver mais" — o botão que abre isso só é visível/focável em
+  // desktop (display:none no mobile, ver <style>), então em telas
+  // estreitas ele nunca recebe clique e o <dialog> nunca é acionado; não
+  // precisa de checagem de largura aqui, o CSS já resolve isso sozinho.
+  const projectModal = document.querySelector<HTMLDialogElement>('#project-modal');
+  const modalCloseBtn = document.querySelector<HTMLButtonElement>('.project-modal-close');
+  const modalCoverImg = document.querySelector<HTMLImageElement>('#project-modal-cover-img');
+  const modalTitle = document.querySelector<HTMLElement>('#project-modal-title');
+  const modalTags = document.querySelector<HTMLElement>('#project-modal-tags');
+  const modalDescription = document.querySelector<HTMLElement>('#project-modal-description');
+  const modalDemo = document.querySelector<HTMLAnchorElement>('#project-modal-demo');
+  const modalGithub = document.querySelector<HTMLAnchorElement>('#project-modal-github');
+
+  function openProjectModal(trigger: HTMLElement) {
+    if (!projectModal) return;
+    const { title = '', cover = '', description = '', demoUrl = '', githubUrl = '' } = trigger.dataset;
+
+    let tags: string[] = [];
+    try {
+      tags = JSON.parse(trigger.dataset.tags ?? '[]');
+    } catch {
+      tags = [];
+    }
+
+    if (modalCoverImg) {
+      modalCoverImg.src = cover;
+      modalCoverImg.alt = `Captura de tela do projeto ${title}`;
+    }
+    if (modalTitle) modalTitle.textContent = title;
+    if (modalDescription) modalDescription.textContent = description;
+    if (modalTags) {
+      modalTags.innerHTML = '';
+      for (const tag of tags) {
+        const chip = document.createElement('span');
+        chip.className = 'tag-pill';
+        chip.textContent = tag;
+        modalTags.appendChild(chip);
+      }
+    }
+    if (modalDemo) {
+      if (demoUrl) {
+        modalDemo.href = demoUrl;
+        modalDemo.style.display = '';
+      } else {
+        modalDemo.style.display = 'none';
+      }
+    }
+    if (modalGithub) {
+      if (githubUrl) {
+        modalGithub.href = githubUrl;
+        modalGithub.style.display = '';
+      } else {
+        modalGithub.style.display = 'none';
+      }
+    }
+
+    // pausa o Lenis (senão ele continua respondendo a eventos de scroll/
+    // wheel por baixo do modal, mesmo com overflow:hidden no <html>) e
+    // trava o scroll nativo da página enquanto o modal está aberto — sem
+    // isso sobrava uma segunda barra de rolagem por trás da do dialog
+    lenis?.stop();
+    document.documentElement.style.overflow = 'hidden';
+    projectModal.showModal();
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.see-more').forEach((btn) => {
+    btn.addEventListener('click', () => openProjectModal(btn));
+  });
+
+  modalCloseBtn?.addEventListener('click', () => projectModal?.close());
+  // clique no backdrop (fora do .project-modal-inner) também fecha —
+  // Esc já fecha sozinho via comportamento nativo do <dialog>
+  projectModal?.addEventListener('click', (e) => {
+    if (e.target === projectModal) projectModal.close();
+  });
+  // 'close' nativo cobre Esc, clique no backdrop e o botão X de uma vez só
+  // — não precisa repetir o destravamento em cada um dos três caminhos
+  projectModal?.addEventListener('close', () => {
+    document.documentElement.style.overflow = '';
+    lenis?.start();
+  });
+</script>

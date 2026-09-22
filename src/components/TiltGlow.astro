@@ -1,0 +1,338 @@
+---
+// Wrapper de efeito visual pra imagens: tilt 3D + brilho que segue o mouse +
+// grafo técnico (nós + linhas) desenhado no hover. Tokens reaproveitados de
+// ds.html; o acento "peach" da referência original virou roxo (--accent-300).
+//
+// Uso:
+//   import TiltGlow from '../components/TiltGlow.astro';
+//   import shot from '../assets/algum-projeto.jpg';
+//   <TiltGlow image={shot} alt="Descrição da imagem" />
+//
+// Por padrão o card é 16:9. Pra encaixar num container com altura própria
+// (ex.: coluna de texto ao lado), use `fill` (aspect-ratio:auto, height:100%)
+// e opcionalmente `objectPosition` pra ajustar o enquadramento da foto.
+// Pra desligar o grafo técnico e manter só tilt + glow, passe `graph={false}`.
+//
+// Puramente visual — não recebe nem renderiza título/legenda. Esse texto
+// fica no componente que envolve o <TiltGlow>.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  image: ImageMetadata;
+  alt: string;
+  /** Preenche 100% da altura do container pai em vez do aspect-ratio 16:9 fixo. */
+  fill?: boolean;
+  /** object-position do CSS, ex.: "32% 15%". Padrão: "50% 50%". */
+  objectPosition?: string;
+  /** Mostra o grafo técnico (nós + linhas) no hover. Padrão: true. */
+  graph?: boolean;
+  class?: string;
+}
+
+const {
+  image,
+  alt,
+  fill = false,
+  objectPosition = '50% 50%',
+  graph = true,
+  class: className,
+} = Astro.props;
+
+// Cluster fixo do grafo (coordenadas em um viewBox 160x90, região
+// inferior-esquerda da foto). Os pontos 3 e 6 (scale 3.2/2.9) são os
+// "nós-hub" — recebem o anel pulsante; os demais são nós simples e estáticos.
+const points = [
+  { x: 18, y: 63, scale: 1.5 },
+  { x: 34, y: 58, scale: 1.7 },
+  { x: 48, y: 67, scale: 1.6 },
+  { x: 40, y: 80, scale: 3.2 },
+  { x: 24, y: 85, scale: 1.4 },
+  { x: 15, y: 75, scale: 1.8 },
+  { x: 58, y: 84, scale: 2.9 },
+];
+const lines: [number, number][] = [
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 4],
+  [4, 5],
+  [5, 0],
+  [3, 6],
+];
+---
+
+<div class:list={['tilt-glow', className]} data-tilt-glow data-fill={fill ? 'true' : undefined}>
+  <div class="tilt-card" data-tilt-card data-fill={fill ? 'true' : undefined}>
+    <div class="tilt-image-layer">
+      <Image src={image} alt={alt} class="tilt-image" style={`object-position:${objectPosition}`} />
+    </div>
+
+    <div class="glow" aria-hidden="true"></div>
+
+    {
+      graph && (
+        <svg
+          class="node-graph"
+          viewBox="0 0 160 90"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+          focusable="false"
+        >
+          {lines.map(([a, b], i) => (
+            <line
+              x1={points[a].x}
+              y1={points[a].y}
+              x2={points[b].x}
+              y2={points[b].y}
+              pathLength="1"
+              class="node-line"
+              style={`transition-delay:${i * 0.05}s`}
+            />
+          ))}
+          {points.map((p, i) => (
+            <g transform={`translate(${p.x} ${p.y})`}>
+              <g
+                class:list={['node', p.scale >= 2.5 && 'node-hub']}
+                style={`--node-delay:${i * 0.09}s; --node-scale:${p.scale};`}
+              >
+                <circle class="node-ring" r="2.2" />
+                <circle class="node-glow" r="1.5" />
+                <circle class="node-core" r="0.55" />
+              </g>
+            </g>
+          ))}
+        </svg>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .tilt-glow {
+    perspective: 1400px;
+  }
+  .tilt-glow[data-fill='true'] {
+    height: 100%;
+  }
+
+  .tilt-card {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    background: var(--ink-800);
+    box-shadow: var(--panel-shadow);
+    transform-style: preserve-3d;
+    transform: rotateX(0deg) rotateY(0deg);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  }
+  .tilt-card[data-fill='true'] {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+  .tilt-card:hover,
+  .tilt-card.is-active {
+    box-shadow: var(--paper-shadow);
+  }
+
+  .tilt-image-layer {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+  .tilt-image-layer :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.05);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tilt-card:hover .tilt-image-layer :global(img),
+  .tilt-card.is-active .tilt-image-layer :global(img) {
+    transform: scale(1.08);
+  }
+
+  /* brilho que segue o cursor — --mx/--my atualizados via JS no mousemove */
+  .glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle 240px at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--accent-300) 55%, transparent),
+      transparent 70%
+    );
+    mix-blend-mode: overlay;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .tilt-card:hover .glow,
+  .tilt-card.is-active .glow {
+    opacity: 1;
+  }
+
+  .node-graph {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .tilt-card:hover .node-graph,
+  .tilt-card.is-active .node-graph {
+    opacity: 0.85;
+  }
+
+  .node-line {
+    fill: none;
+    stroke: var(--accent-300);
+    stroke-width: 0.4;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tilt-card:hover .node-line,
+  .tilt-card.is-active .node-line {
+    stroke-dashoffset: 0;
+  }
+
+  .node {
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--node-delay, 0s);
+  }
+  .tilt-card:hover .node,
+  .tilt-card.is-active .node {
+    opacity: 1;
+    transform: scale(var(--node-scale, 1));
+  }
+
+  .node-core {
+    fill: #fff;
+  }
+  .node-glow {
+    fill: color-mix(in srgb, var(--accent-300) 45%, transparent);
+  }
+  .node-ring {
+    fill: none;
+    stroke: var(--accent-300);
+    stroke-width: 0.3;
+    opacity: 0;
+  }
+  .node-hub .node-ring {
+    /* mesma questão do fill-box já resolvida em .node: sem isso o scale()
+       do pulso pivotaria a partir do viewBox inteiro, não do próprio nó. */
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: node-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    animation-delay: var(--node-delay, 0s);
+  }
+  @keyframes node-pulse {
+    0% {
+      opacity: 0.6;
+      transform: scale(0.6);
+    }
+    70% {
+      opacity: 0;
+      transform: scale(1.8);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.8);
+    }
+  }
+
+  /* leitores de tela/touch sem hover: grafo estático e discreto,
+     sem desenhar linha nem brilho seguindo o cursor */
+  @media (hover: none) {
+    .glow {
+      display: none;
+    }
+    .node-graph {
+      opacity: 0.3;
+    }
+    .node-line {
+      stroke-dashoffset: 0;
+      transition: none;
+    }
+    .node {
+      opacity: 1;
+      transform: scale(var(--node-scale, 1));
+      transition: none;
+    }
+    .node-hub .node-ring {
+      animation: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tilt-card,
+    .tilt-image-layer :global(img) {
+      transition: none;
+    }
+    .glow {
+      display: none;
+    }
+    .node-graph {
+      opacity: 0.3 !important;
+      transition: none;
+    }
+    .node-line {
+      stroke-dashoffset: 0;
+      transition: none;
+    }
+    .node {
+      opacity: 1;
+      transform: scale(var(--node-scale, 1));
+      transition: none;
+    }
+    .node-hub .node-ring {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (!reducedMotion && canHover) {
+    const maxTilt = 7; // graus
+
+    document.querySelectorAll<HTMLElement>('[data-tilt-glow]').forEach((card) => {
+      const inner = card.querySelector<HTMLElement>('[data-tilt-card]');
+      if (!inner) return;
+
+      function onMouseMove(e: MouseEvent) {
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+
+        const rotateY = (px - 0.5) * maxTilt * 2;
+        const rotateX = (0.5 - py) * maxTilt * 2;
+
+        inner!.style.willChange = 'transform';
+        inner!.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        card.style.setProperty('--mx', `${px * 100}%`);
+        card.style.setProperty('--my', `${py * 100}%`);
+      }
+
+      function onMouseLeave() {
+        inner!.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        inner!.style.willChange = 'auto';
+      }
+
+      card.addEventListener('mousemove', onMouseMove);
+      card.addEventListener('mouseleave', onMouseLeave);
+    });
+  }
+</script>

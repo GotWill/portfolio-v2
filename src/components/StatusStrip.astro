@@ -1,0 +1,190 @@
+---
+// Faixa de status — cores/fontes extraídas de ds.html (ink-900/ink-800,
+// cream-100, roxo-300, Archivo mono uppercase, Newsreader itálico).
+// A barra é sempre escura (não reage ao toggle de tema), então os tons de
+// texto usam os valores literais do tema escuro em vez das custom
+// properties reativas — mesma decisão já usada no ScrollHero para o
+// texto sobre a foto.
+const now = new Date();
+const monthAbbr = new Intl.DateTimeFormat('pt-BR', { month: 'short' })
+  .format(now)
+  .replace('.', '')
+  .toUpperCase();
+const yearShort = String(now.getFullYear()).slice(-2);
+const badgeDate = `${monthAbbr} '${yearShort}`;
+
+const columns = [
+  {
+    label: 'Construindo',
+    title: 'Este portfólio',
+    subtitle: 'Astro + o próprio design system que você está vendo agora',
+  },
+  {
+    label: 'Leitura',
+    title: 'Há Sol na Solidão',
+    subtitle: 'Fred Elboni',
+  },
+  {
+    label: 'Stack atual',
+    title: 'WordPress + Next + Node',
+    subtitle: 'Cada projeto pede uma ferramenta diferente',
+  },
+];
+---
+
+<section class="status-strip" id="status-strip">
+  <div class="status-strip-inner">
+    <div class="badge">
+      <span class="dot"></span>
+      <span class="badge-text">Agora · {badgeDate}</span>
+      <span class="badge-line"></span>
+    </div>
+
+    <div class="columns">
+      {
+        columns.map((col) => (
+          <div class="column">
+            <div class="column-label">{col.label}</div>
+            <div class="column-title">{col.title}</div>
+            <div class="column-subtitle">{col.subtitle}</div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .status-strip {
+    background: linear-gradient(180deg, #1a1612 0%, #0f0c09 100%);
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 28px 0;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .status-strip.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .status-strip {
+      transform: none;
+      transition: opacity 0.65s ease;
+    }
+  }
+
+  .status-strip-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 40px;
+  }
+  @media (min-width: 768px) {
+    .status-strip-inner {
+      padding: 0 40px;
+    }
+  }
+  @media (max-width: 640px) {
+    .status-strip-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: none;
+  }
+  .badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent-300);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-300) 20%, transparent);
+    flex: none;
+    animation: pulse-soft 2.6s ease-in-out infinite;
+  }
+  .badge-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #b9a99a;
+    white-space: nowrap;
+  }
+  .badge-line {
+    width: 56px;
+    height: 1px;
+    background: linear-gradient(90deg, #b9a99a 0%, transparent 100%);
+    flex: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .badge .dot {
+      animation: none;
+    }
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 40px;
+    flex: 1;
+    min-width: 0;
+  }
+  @media (max-width: 640px) {
+    .columns {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+
+  .column-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #9f9089;
+    margin-bottom: 8px;
+  }
+  .column-title {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 21px;
+    line-height: 1.25;
+    color: #f5f1e8;
+  }
+  .column-subtitle {
+    margin-top: 6px;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: #b9a99a;
+  }
+</style>
+
+<script>
+  const strip = document.getElementById('status-strip');
+
+  if (strip) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            strip.classList.add('is-visible');
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(strip);
+  }
+</script>
