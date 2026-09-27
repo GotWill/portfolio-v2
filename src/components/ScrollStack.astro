@@ -5,11 +5,17 @@
 // funções chamadas num <script>; cardsRef.current vira
 // document.querySelectorAll; lastTransformsRef vira um Map de módulo com a
 // mesma lógica de hasChanged pra não escrever style à toa.
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import GlassButton from './GlassButton.astro';
+import coverRickAndMorty from '../assets/projects/rick-and-morty.webp';
+import coverImc from '../assets/projects/imc.webp';
+import coverLuxeStore from '../assets/projects/luxe-store.webp';
+import coverWeather from '../assets/projects/weather.webp';
 
 interface Project {
   title: string;
-  cover: string;
+  cover: ImageMetadata;
   tags: string[];
   description: string;
   demoUrl?: string;
@@ -24,7 +30,7 @@ interface Props {
 const defaultProjects: Project[] = [
   {
     title: 'Rick And Morty',
-    cover: '/projects/rick-and-morty.webp',
+    cover: coverRickAndMorty,
     tags: ['React', 'styled-components', 'axios', 'context api'],
     description:
       'Aplicação interativa que consome a API oficial de Rick and Morty para listar, favoritar e explorar detalhes de personagens, episódios e localizações. Conta com um sistema avançado de filtragem multi-critério por nome, espécie e gênero, focado em alta performance e experiência de busca fluida.',
@@ -33,7 +39,7 @@ const defaultProjects: Project[] = [
   },
   {
     title: 'IMC',
-    cover: '/projects/imc.webp',
+    cover: coverImc,
     tags: ['React'],
     description:
       'Uma aplicação simples e responsiva desenvolvida em React para o cálculo do Índice de Massa Corporal (IMC). O projeto recebe o peso e a altura do usuário, realiza o cálculo em tempo real e exibe a classificação da OMS (Abaixo do peso, Peso normal, Sobrepeso, etc.) de forma visual e intuitiva.',
@@ -42,7 +48,7 @@ const defaultProjects: Project[] = [
   },
   {
     title: 'Luxe Store',
-    cover: '/projects/luxe-store.webp',
+    cover: coverLuxeStore,
     tags: [
       'React',
       'shadcn/ui',
@@ -59,7 +65,7 @@ const defaultProjects: Project[] = [
   },
   {
     title: 'Weather Analytics',
-    cover: '/projects/weather.webp',
+    cover: coverWeather,
     tags: [
       'Python',
       'Go',
@@ -82,6 +88,12 @@ const defaultProjects: Project[] = [
 ];
 
 const { projects = defaultProjects } = Astro.props;
+
+// URL final (já otimizada/hasheada) de cada capa, pro <img> do modal — ele é
+// populado via JS a partir de data-cover (dataset só aceita string), então
+// precisa da mesma imagem já resolvida em build time, não do objeto
+// ImageMetadata cru que o <Image> abaixo recebe.
+const resolvedCovers = await Promise.all(projects.map((p) => getImage({ src: p.cover })));
 ---
 
 <section class="projects" id="projetos">
@@ -101,7 +113,7 @@ const { projects = defaultProjects } = Astro.props;
         projects.map((p, i) => (
           <article class="scroll-stack-card" data-index={i}>
             <div class="cover">
-              <img
+              <Image
                 src={p.cover}
                 alt={`Captura de tela do projeto ${p.title}`}
                 loading="lazy"
@@ -132,7 +144,7 @@ const { projects = defaultProjects } = Astro.props;
                   class="see-more"
                   aria-haspopup="dialog"
                   data-title={p.title}
-                  data-cover={p.cover}
+                  data-cover={resolvedCovers[i].src}
                   data-tags={JSON.stringify(p.tags)}
                   data-description={p.description}
                   data-demo-url={p.demoUrl ?? ''}
@@ -389,7 +401,9 @@ const { projects = defaultProjects } = Astro.props;
     aspect-ratio: 16 / 9;
     background: var(--ink-800);
   }
-  .scroll-stack-card .cover img {
+  /* :global() necessário: <Image> (astro:assets) renderiza o <img> fora do
+     escopo deste componente. */
+  .scroll-stack-card .cover :global(img) {
     display: block;
     width: 100%;
     height: 100%;

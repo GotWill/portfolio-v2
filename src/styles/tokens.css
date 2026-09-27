@@ -9,12 +9,14 @@
   color-scheme: dark;
 
   /* Fontes — combinação 100% sans-serif: Poppins (títulos e corpo) +
-     JetBrains Mono (tags/metadados). --font-serif mantém o nome do token
-     por compatibilidade com os componentes que já o referenciam (itálicos
-     de destaque e texto de corpo), mas aponta pra Poppins como as demais. */
-  --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  --font-serif: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+     JetBrains Mono (tags/metadados), self-hosted via Fonts API do Astro
+     (astro.config.mjs). --font-display/--font-mono NÃO são definidas aqui:
+     o <Font cssVariable="..."> em Layout.astro injeta o valor real
+     (font-family self-hosted + fallbacks) em :root no build. --font-serif
+     mantém o nome do token por compatibilidade com os componentes que já o
+     referenciam (itálicos de destaque e texto de corpo), como alias do
+     mesmo Poppins usado em --font-display. */
+  --font-serif: var(--font-display);
 
   /* Neutros — cream (tema escuro) */
   --cream-50: #faf7f0;

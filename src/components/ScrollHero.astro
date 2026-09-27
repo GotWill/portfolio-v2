@@ -7,11 +7,15 @@
 // <script> abaixo troque a linha marcada por
 // `video.currentTime = progress * video.duration`. A lógica de leitura do
 // scroll (getBoundingClientRect + --p) permanece idêntica.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import GlassButton from './GlassButton.astro';
+import defaultImageA from '../assets/1.jpeg';
+import defaultImageB from '../assets/2.jpeg';
 
 interface Props {
-  imageA?: string;
-  imageB?: string;
+  imageA?: ImageMetadata;
+  imageB?: ImageMetadata;
   imageAlt?: string;
   eyebrow?: string;
   lead?: string;
@@ -20,8 +24,8 @@ interface Props {
 }
 
 const {
-  imageA = '/1.jpeg',
-  imageB = '/2.jpeg',
+  imageA = defaultImageA,
+  imageB = defaultImageB,
   imageAlt = '',
   eyebrow = 'São Paulo, Brasil',
   lead = 'Desenvolvo ecossistemas virtuais e produtos digitais que alinham estética apurada, usabilidade intuitiva e código de alto desempenho.',
@@ -32,8 +36,8 @@ const {
 
 <section class="scroll-hero" id="inicio">
   <div class="pin" id="scroll-hero-pin">
-    <img class="frame frame-a" src={imageA} alt={imageAlt} fetchpriority="high" />
-    <img class="frame frame-b" src={imageB} alt="" aria-hidden="true" />
+    <Image src={imageA} alt={imageAlt} class="frame frame-a" width={1600} height={893} priority />
+    <Image src={imageB} alt="" aria-hidden="true" class="frame frame-b" width={1600} height={893} />
     <div class="grade"></div>
     <div class="grain"></div>
 
@@ -67,7 +71,11 @@ const {
     --p: 0; /* progresso de 0 a 1, atualizado via JS a cada frame de scroll */
   }
 
-  .frame {
+  /* :global() necessário aqui: <Image> (astro:assets) renderiza o <img>
+     fora do escopo deste componente, então o seletor scoped padrão do
+     Astro nunca bateria nesse elemento — mesmo problema/solução já usados
+     em TiltGlow.astro (.tilt-image-layer :global(img)). */
+  :global(.frame) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -76,16 +84,16 @@ const {
     object-position: 62% 30%;
     will-change: transform, opacity;
   }
-  .frame-a {
+  :global(.frame-a) {
     transform: scale(calc(1.08 - 0.08 * var(--p))) translateY(calc(-3% * var(--p)));
   }
-  .frame-b {
+  :global(.frame-b) {
     opacity: var(--p);
     transform: scale(calc(1.14 - 0.14 * var(--p))) translateY(calc(-3% * var(--p)));
   }
   @media (prefers-reduced-motion: reduce) {
-    .frame-a,
-    .frame-b {
+    :global(.frame-a),
+    :global(.frame-b) {
       transform: none;
     }
   }
@@ -93,13 +101,13 @@ const {
   /* enquadramento mobile — só .frame-b precisa de ajuste: os dois frames
      têm a pessoa em lados opostos da foto (frame-a ~62%, à direita —
      coincide com o valor padrão; frame-b ~30%, à esquerda — visto direto
-     nos arquivos em public/1.jpeg e public/2.jpeg), então herdar o mesmo
-     62% do frame-a cortava o corpo em frame-b. Precisa vir depois da
+     nos arquivos em src/assets/1.jpeg e src/assets/2.jpeg), então herdar o
+     mesmo 62% do frame-a cortava o corpo em frame-b. Precisa vir depois da
      regra base .frame (acima) no arquivo: mesma especificidade (uma
      classe cada), media query não muda isso, então a ordem no arquivo
      decide o empate. */
   @media (max-width: 768px) {
-    .frame-b {
+    :global(.frame-b) {
       object-position: 30% 30%;
     }
   }
