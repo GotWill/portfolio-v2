@@ -15,19 +15,22 @@ const badgeDate = `${monthAbbr} '${yearShort}`;
 
 const columns = [
   {
-    label: 'Construindo',
-    title: 'Este portfólio',
-    subtitle: 'Astro + o próprio design system que você está vendo agora',
+    title: 'Aplicações Web & Sistemas',
+    subtitle:
+      'Construção de dashboards, plataformas e sistemas complexos com foco em usabilidade e regras de negócio.',
   },
   {
-    label: 'Leitura',
-    title: 'Há Sol na Solidão',
-    subtitle: 'Fred Elboni',
+    title: 'Design Systems & Componentes',
+    subtitle: 'Criação de bibliotecas de componentes reutilizáveis, padronizados e com alta acessibilidade.',
   },
   {
-    label: 'Stack atual',
-    title: 'WordPress + Next + Node',
-    subtitle: 'Cada projeto pede uma ferramenta diferente',
+    title: 'Performance & Acessibilidade',
+    subtitle:
+      'Aplicações otimizadas para carregamento rápido, consumo eficiente de APIs e acessibilidade (a11y).',
+  },
+  {
+    title: 'Next.js + Node.js + TypeScript',
+    subtitle: 'As principais tecnologias que utilizo para estruturar e escalar aplicações modernas.',
   },
 ];
 ---
@@ -44,7 +47,6 @@ const columns = [
       {
         columns.map((col) => (
           <div class="column">
-            <div class="column-label">{col.label}</div>
             <div class="column-title">{col.title}</div>
             <div class="column-subtitle">{col.subtitle}</div>
           </div>
@@ -59,7 +61,7 @@ const columns = [
     background: linear-gradient(180deg, #1a1612 0%, #0f0c09 100%);
     border-top: 1px solid var(--border-soft);
     border-bottom: 1px solid var(--border-soft);
-    padding: 28px 0;
+    padding: 36px 0;
     opacity: 0;
     transform: translateY(24px);
     transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
@@ -80,19 +82,13 @@ const columns = [
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 40px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
   }
   @media (min-width: 768px) {
     .status-strip-inner {
       padding: 0 40px;
-    }
-  }
-  @media (max-width: 640px) {
-    .status-strip-inner {
-      flex-direction: column;
-      align-items: flex-start;
     }
   }
 
@@ -100,7 +96,7 @@ const columns = [
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: none;
+    width: 100%;
   }
   .badge .dot {
     width: 6px;
@@ -120,11 +116,130 @@ const columns = [
     white-space: nowrap;
   }
   .badge-line {
-    width: 56px;
+    flex: 1;
+    max-width: 120px;
+    min-width: 24px;
     height: 1px;
     background: linear-gradient(90deg, #b9a99a 0%, transparent 100%);
-    flex: none;
+    position: relative;
+    overflow: visible;
+    transform-origin: 0;
   }
+
+  /* estado inicial (antes do reveal): linha invisível/colapsada — só sob
+     no-preference, pra reduced motion nunca ficar presa em opacity:0
+     esperando uma animação que não vai rodar */
+  @media (prefers-reduced-motion: no-preference) {
+    .badge-line {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+  }
+
+  .badge-line::before,
+  .badge-line::after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* rastro de luz atrás do pontinho */
+  .badge-line::before {
+    inset: -1px 0;
+    transform-origin: 0;
+    background: linear-gradient(
+      270deg,
+      transparent 0%,
+      color-mix(in srgb, #f5f1e8 30%, transparent) 24%,
+      var(--accent-300) 68%,
+      #f5f1e8 100%
+    );
+  }
+
+  /* pontinho brilhante (a "estrela cadente" em si) */
+  .badge-line::after {
+    top: 50%;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #f5f1e8;
+    transform: translate(-50%, -50%) scale(0.55);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-300) 70%, transparent),
+      0 0 18px color-mix(in srgb, #f5f1e8 35%, transparent);
+  }
+
+  /* dispara junto com o fade-in da faixa (.status-strip.is-visible) */
+  @media (prefers-reduced-motion: no-preference) {
+    .status-strip.is-visible .badge-line {
+      animation: chapter-rule-settle 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .status-strip.is-visible .badge-line::before {
+      animation: chapter-rule-sweep 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .status-strip.is-visible .badge-line::after {
+      animation: chapter-rule-burst 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+
+  @keyframes chapter-rule-settle {
+    0% {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    56% {
+      opacity: 0.9;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes chapter-rule-sweep {
+    0% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(-72%) scaleX(0.18);
+    }
+    14% {
+      opacity: 0.85;
+    }
+    58% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-300) 55%, transparent));
+      transform: translateX(18%) scaleX(0.92);
+    }
+    100% {
+      opacity: 0;
+      filter: drop-shadow(0 0 0 transparent);
+      transform: translateX(88%) scaleX(0.2);
+    }
+  }
+  @keyframes chapter-rule-burst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.45);
+    }
+    16% {
+      opacity: 1;
+      transform: translate(10px, -50%) scale(0.8);
+    }
+    58% {
+      opacity: 1;
+      transform: translate(76px, -50%) scale(1.15);
+    }
+    78% {
+      opacity: 0.36;
+      transform: translate(94px, -50%) scale(1.7);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(104px, -50%) scale(2.05);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .badge .dot {
       animation: none;
@@ -133,39 +248,55 @@ const columns = [
 
   .columns {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0 40px;
-    flex: 1;
-    min-width: 0;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
   }
-  @media (max-width: 640px) {
+  @media (max-width: 900px) {
+    .columns {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 480px) {
     .columns {
       grid-template-columns: 1fr;
-      gap: 20px;
     }
   }
 
-  .column-label {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #9f9089;
-    margin-bottom: 8px;
+  .column {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 22px 20px;
+    transition: border-color 0.4s ease, transform 0.4s ease, background 0.4s ease;
   }
+  .column:hover {
+    border-color: color-mix(in srgb, var(--accent-300) 45%, transparent);
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.015) 100%);
+    transform: translateY(-2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .column {
+      transition: border-color 0.4s ease, background 0.4s ease;
+    }
+    .column:hover {
+      transform: none;
+    }
+  }
+
   .column-title {
     font-family: var(--font-serif);
     font-style: italic;
     font-weight: 500;
-    font-size: 21px;
+    font-size: 19px;
     line-height: 1.25;
     color: #f5f1e8;
   }
   .column-subtitle {
-    margin-top: 6px;
+    margin-top: 10px;
     font-family: var(--font-serif);
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.55;
     color: #b9a99a;
   }
 </style>

@@ -24,8 +24,8 @@ const {
   imageB = '/2.jpeg',
   imageAlt = '',
   eyebrow = 'São Paulo, Brasil',
-  lead = 'WordPress sob medida e produtos em Next.js/React — sempre com atenção ao detalhe visual, não só ao código.',
-  ctaLabel = 'Ver projetos',
+  lead = 'Desenvolvo ecossistemas virtuais e produtos digitais que alinham estética apurada, usabilidade intuitiva e código de alto desempenho.',
+  ctaLabel = 'Conhecer meu trabalho',
   ctaHref = '#projetos',
 } = Astro.props;
 ---
@@ -39,7 +39,7 @@ const {
 
     <div class="hero-copy">
       <div class="eyebrow"><span class="dot"></span>{eyebrow}</div>
-      <h1><slot name="headline">Willian Pereira — <em>desenvolvedor</em> com olhar de design.</slot></h1>
+      <h1><slot name="headline">Willian Pereira — <em>construindo</em> experiências digitais memoráveis.</slot></h1>
       <p>{lead}</p>
       <GlassButton href={ctaHref} tone="dark" class="cta">{ctaLabel}</GlassButton>
     </div>
@@ -129,13 +129,14 @@ const {
     right: 0;
     bottom: 0;
     padding: 0 22px 64px;
-    max-width: 640px;
+    max-width: 780px;
     opacity: clamp(0, calc((1 - var(--p)) / 0.55), 1);
     transform: translateY(calc(var(--p) * -14px));
   }
   @media (min-width: 768px) {
     .hero-copy {
       padding: 0 56px 88px;
+      max-width: 920px;
     }
   }
 
@@ -186,6 +187,11 @@ const {
 
   .hero-copy :global(.cta) {
     margin-top: 30px;
+    min-height: 52px;
+    padding: 0 32px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.24em;
   }
 
   .scroll-hint {

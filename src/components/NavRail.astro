@@ -15,8 +15,8 @@ interface SectionLink {
 
 const sections: SectionLink[] = [
   { roman: 'I', label: 'Início', id: 'inicio' },
-  { roman: 'II', label: 'Como eu trabalho', id: 'como-eu-trabalho' },
-  { roman: 'III', label: 'Experiência', id: 'experiencia' },
+  { roman: 'II', label: 'Quem sou eu', id: 'como-eu-trabalho' },
+  { roman: 'III', label: 'Trajetória', id: 'experiencia' },
   { roman: 'IV', label: 'Projetos', id: 'projetos' },
   { roman: 'V', label: 'Kit de ferramentas', id: 'kit-de-ferramentas' },
   { roman: 'VI', label: 'Contato', id: 'contato' },
@@ -89,8 +89,8 @@ const sections: SectionLink[] = [
     border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
     background-color: var(--panel-bg, rgba(26, 22, 18, 0.8));
     background-image: var(--glass-sheen, none);
-    backdrop-filter: blur(22px) saturate(160%);
     -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
     box-shadow: var(--glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.16)),
       var(--panel-shadow, 0 16px 34px -24px rgba(0, 0, 0, 0.55));
   }

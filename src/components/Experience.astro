@@ -30,19 +30,8 @@ const details = [
     role: 'Full-Stack Developer',
     company: 'Baiaku',
     paragraph:
-      'Atuei no desenvolvimento full-stack de sites institucionais e sistemas internos, sempre com foco em performance e SEO — da estrutura do back-end até os detalhes de como a página carrega e é encontrada. Também construí dashboards interativos com Looker Studio, transformando dado bruto em painéis que times não técnicos conseguiam usar sozinhos.',
-    cards: [
-      {
-        label: 'SITES INSTITUCIONAIS',
-        title: 'Performance e SEO como parte do escopo, não um retrabalho depois.',
-        text: 'Cada site já nascia pensado pra carregar rápido e ser indexado direito.',
-      },
-      {
-        label: 'DASHBOARDS DE DADOS',
-        title: 'Looker Studio virando decisão, não só gráfico bonito.',
-        text: 'Painéis que davam autonomia pro time olhar os números sem depender de relatório manual.',
-      },
-    ],
+      'Atuação no desenvolvimento de plataformas web focadas em performance e SEO, aliada à criação de dashboards interativos no Looker Studio para análise de dados. Responsável também pela gestão técnica de CRM, desenvolvendo integrações, automações de processos e e-mails marketing.',
+    cards: [],
   },
   {
     id: 'exp-2',
@@ -51,19 +40,8 @@ const details = [
     role: 'Front-End Developer',
     company: 'RT Publicity',
     paragraph:
-      'Desenvolvi sistemas web em PHP, HTML, CSS e JavaScript pra demandas internas e de clientes, além de lojas virtuais completas usando plataformas como Tray, Yampi e Irroba — do catálogo ao checkout.',
-    cards: [
-      {
-        label: 'SISTEMAS SOB MEDIDA',
-        title: 'Ferramentas feitas pro problema real do time, não um genérico de prateleira.',
-        text: 'Sistemas construídos direto pra demanda do cliente ou da própria agência.',
-      },
-      {
-        label: 'E-COMMERCE',
-        title: 'Loja virtual funcionando de ponta a ponta, não só vitrine.',
-        text: 'Implementação completa em Tray, Yampi e Irroba — configuração até checkout de verdade.',
-      },
-    ],
+      'Desenvolvimento de sistemas web utilizando PHP, HTML, CSS e JavaScript, voltados para demandas internas e de clientes. Criação de sites institucionais com foco em performance e SEO. Desenvolvimento de lojas virtuais (e-commerces) utilizando plataformas como: Tray, Yampi e Irróba.',
+    cards: [],
   },
 ];
 ---
@@ -73,10 +51,10 @@ const details = [
     <div class="eyebrow" id="experience-eyebrow">
       <span class="index">02</span>
       <span class="rule"></span>
-      <span class="label">Experiência</span>
+      <span class="label">Trajetória</span>
     </div>
 
-    <h2>Quatro anos <em>entre sites institucionais, sistemas sob medida e e-commerce.</em></h2>
+    <h2>Trajetória focada em <em>transformar requisitos de negócio em software escalável, performático e intuitivo.</em></h2>
 
     <ul class="summary-list">
       {
@@ -112,15 +90,17 @@ const details = [
               <p class="company">{item.company}</p>
               <p class="paragraph">{item.paragraph}</p>
 
-              <div class="cards">
-                {item.cards.map((card) => (
-                  <div class="card">
-                    <span class="card-label">{card.label}</span>
-                    <h4>{card.title}</h4>
-                    <p>{card.text}</p>
-                  </div>
-                ))}
-              </div>
+              {item.cards.length > 0 && (
+                <div class="cards">
+                  {item.cards.map((card) => (
+                    <div class="card">
+                      <span class="card-label">{card.label}</span>
+                      <h4>{card.title}</h4>
+                      <p>{card.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         ))

@@ -65,7 +65,6 @@ const categories: Category[] = [
         </div>
         <h2>Tudo que uso <em>pra sair da ideia pro deploy.</em></h2>
       </div>
-      <p class="side-note">Sete frentes de trabalho, do primeiro esboço ao sistema no ar.</p>
     </div>
 
     <div class="toolkit-grid">
@@ -270,25 +269,6 @@ const categories: Category[] = [
     color: var(--accent-300);
   }
 
-  .side-note {
-    flex: none;
-    max-width: 220px;
-    margin: 6px 0 0;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-mute);
-    line-height: 1.6;
-    text-align: right;
-  }
-  @media (max-width: 760px) {
-    .side-note {
-      max-width: none;
-      text-align: left;
-    }
-  }
-
   /* Grid de cards */
   .toolkit-grid {
     display: grid;
@@ -320,8 +300,8 @@ const categories: Category[] = [
       --glass-spot,
       radial-gradient(60% 55% at 50% 22px, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 42%, transparent 72%)
     );
-    backdrop-filter: blur(22px) saturate(160%);
     -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
     box-shadow: var(--glass-highlight-soft, inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 46px rgba(255, 255, 255, 0.015)),
       var(--panel-shadow, 0 16px 34px -24px rgba(0, 0, 0, 0.55));
     transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
