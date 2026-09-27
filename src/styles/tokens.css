@@ -8,10 +8,13 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  /* Fontes */
-  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Archivo', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  /* Fontes — combinação 100% sans-serif: Poppins (títulos e corpo) +
+     JetBrains Mono (tags/metadados). --font-serif mantém o nome do token
+     por compatibilidade com os componentes que já o referenciam (itálicos
+     de destaque e texto de corpo), mas aponta pra Poppins como as demais. */
+  --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-serif: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 
   /* Neutros — cream (tema escuro) */
   --cream-50: #faf7f0;
