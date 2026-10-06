@@ -1,0 +1,611 @@
+---
+// Botão fixo no antigo lugar do ThemeToggle (top:20px, 52px, z-index:80).
+// Abre um <dialog> com animação de "impressão ao vivo" sobre a prévia da
+// primeira página do currículo (src/assets/curriculo-preview.webp). O PDF
+// real nunca é carregado dentro da página — só o <a href="/curriculo.pdf">
+// (aberto numa aba nova, ou baixado) depois que a animação termina.
+import { Image } from 'astro:assets';
+import preview from '../assets/curriculo-preview.webp';
+---
+
+<div class="print-resume-trigger-wrap" id="print-resume-trigger-wrap">
+  <button
+    class="print-resume-trigger"
+    id="print-resume-trigger"
+    type="button"
+    aria-label="Ver currículo"
+    aria-haspopup="dialog"
+  >
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M7 8.5V3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v5"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linejoin="round"
+      ></path>
+      <rect x="4" y="8.5" width="16" height="7.5" rx="1.2" stroke="currentColor" stroke-width="1.4"></rect>
+      <circle cx="16.3" cy="11.6" r="0.9" fill="currentColor"></circle>
+      <path
+        d="M7.5 15.3h9v5.2a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-5.2Z"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linejoin="round"
+      ></path>
+      <path d="M9.3 17.6h5.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"></path>
+    </svg>
+  </button>
+
+  <!-- "Recorte" da primeira página — só um indício visual no hover/foco,
+       não é interativo (o clique continua sendo só no botão). -->
+  <div class="print-resume-peek" aria-hidden="true">
+    <Image
+      src={preview}
+      alt=""
+      width={1020}
+      height={1320}
+      class="print-resume-peek-img"
+    />
+  </div>
+</div>
+
+<!-- Acesso direto ao arquivo sem depender de JS (navegação sem script,
+     leitor de tela que ignora o botão, etc). -->
+<a href="/curriculo.pdf" class="print-resume-fallback-link">Baixar currículo em PDF</a>
+
+<dialog id="print-resume-dialog" class="print-resume">
+  <div class="print-resume-panel" id="print-resume-panel">
+    <button class="print-resume-close" id="print-resume-close" type="button" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 5l14 14M19 5 5 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+      </svg>
+    </button>
+
+    <div class="print-resume-sheet-wrap">
+      <div class="print-resume-sheet" id="print-resume-sheet">
+        <Image
+          src={preview}
+          alt="Prévia da primeira página do currículo de Willian Pereira"
+          width={1020}
+          height={1320}
+          class="print-resume-sheet-img"
+        />
+        <span class="print-resume-scan" id="print-resume-scan" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <p class="print-resume-label" id="print-resume-label">Imprimindo · 0%</p>
+
+    <div class="print-resume-actions">
+      <a
+        href="/curriculo.pdf"
+        target="_blank"
+        rel="noopener"
+        class="print-resume-open"
+        id="print-resume-open"
+        hidden
+        >Abrir PDF</a
+      >
+      <a
+        href="/curriculo.pdf"
+        download="curriculo-willian-pereira.pdf"
+        class="print-resume-download"
+        id="print-resume-download"
+        hidden
+        >Baixar</a
+      >
+    </div>
+
+    <p class="print-resume-caption">2 páginas · PDF</p>
+  </div>
+</dialog>
+
+<style>
+  .print-resume-trigger-wrap {
+    position: fixed;
+    top: calc(20px + env(safe-area-inset-top, 0px));
+    right: calc(20px + env(safe-area-inset-right, 0px));
+    z-index: 80;
+    width: 52px;
+    height: 52px;
+  }
+
+  .print-resume-trigger {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border-soft);
+    background: var(--pill-bg);
+    box-shadow: var(--pill-shadow);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: border-color 0.3s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s;
+  }
+  .print-resume-trigger:hover {
+    border-color: color-mix(in srgb, var(--accent-300) 55%, transparent);
+    color: var(--accent-200);
+    transform: scale(1.05);
+  }
+  .print-resume-trigger:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 4px;
+  }
+  .print-resume-trigger svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* "recorte" da prévia — minúsculo, só pra indicar o que tem no botão.
+     Centrado na altura do botão, surge à esquerda dele (nunca por cima do
+     WhatsAppButton, que fica 34px abaixo). pointer-events:none: o hover é
+     sempre lido no wrap, nunca na miniatura em si. */
+  .print-resume-peek {
+    position: absolute;
+    top: 50%;
+    right: 60px;
+    width: 64px;
+    height: 83px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    background: var(--panel-bg);
+    box-shadow: var(--panel-shadow), 0 14px 28px -14px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transform-origin: bottom right;
+    transform: translateY(-50%) translateX(10px) scale(0.84) rotate(6deg);
+    transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .print-resume-peek-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+  }
+  @media (hover: hover) {
+    .print-resume-trigger-wrap:hover .print-resume-peek,
+    .print-resume-trigger-wrap:focus-within .print-resume-peek {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0) scale(1) rotate(-3deg);
+    }
+  }
+
+  .print-resume-fallback-link {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* ---------- Dialog: fundo roxo opaco em tela cheia ---------- */
+  dialog.print-resume:not([open]) {
+    display: none !important;
+  }
+  .print-resume {
+    position: fixed;
+    inset: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    max-width: none;
+    max-height: none;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: visible;
+  }
+  .print-resume::backdrop {
+    background: rgba(20, 12, 24, 0.78);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  /* o painel ocupa a tela inteira com um fundo roxo sólido e opaco (sem
+     transparência nenhuma, nem glow com stops "transparent") — sem cortina:
+     só um assentamento suave (fade + leve zoom-out), confiante e rápido. */
+  .print-resume-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 30px 28px;
+    box-sizing: border-box;
+    background: linear-gradient(165deg, var(--roxo-600) 0%, var(--ink-900) 46%, var(--ink-950) 100%);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    opacity: 0;
+    transform: scale(1.04);
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .print-resume.is-open .print-resume-panel {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .print-resume-panel::-webkit-scrollbar {
+    width: 8px;
+  }
+  .print-resume-panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .print-resume-panel::-webkit-scrollbar-thumb {
+    background-color: var(--accent-300);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .print-resume-panel::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-200);
+  }
+
+  .print-resume-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+    background: var(--panel-bg);
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: border-color 0.3s, color 0.3s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .print-resume-close:hover {
+    border-color: color-mix(in srgb, var(--accent-300) 55%, transparent);
+    color: var(--accent-200);
+    transform: scale(1.06);
+  }
+  .print-resume-close:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 3px;
+  }
+  .print-resume-close svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* conteúdo entra em leque, um pouco atrás do fundo — reforça a sensação
+     de profundidade/camadas */
+  .print-resume-sheet-wrap,
+  .print-resume-label,
+  .print-resume-actions,
+  .print-resume-caption {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .print-resume.is-open .print-resume-sheet-wrap {
+    transition-delay: 0.14s;
+  }
+  .print-resume.is-open .print-resume-label {
+    transition-delay: 0.22s;
+  }
+  .print-resume.is-open .print-resume-actions {
+    transition-delay: 0.27s;
+  }
+  .print-resume.is-open .print-resume-caption {
+    transition-delay: 0.32s;
+  }
+  .print-resume.is-open .print-resume-sheet-wrap,
+  .print-resume.is-open .print-resume-label,
+  .print-resume.is-open .print-resume-actions,
+  .print-resume.is-open .print-resume-caption {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .print-resume-sheet-wrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .print-resume-sheet {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    aspect-ratio: 17 / 22;
+    max-height: 64vh;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--modal-shadow), 0 50px 110px -40px color-mix(in srgb, var(--roxo-600) 55%, transparent);
+  }
+
+  .print-resume-sheet-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .print-resume-scan {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--roxo-200);
+    box-shadow: 0 0 10px var(--roxo-300), 0 0 26px var(--roxo-300);
+    pointer-events: none;
+  }
+
+  .print-resume-label {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+  }
+
+  .print-resume-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .print-resume-open,
+  .print-resume-download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .print-resume-open:focus-visible,
+  .print-resume-download:focus-visible {
+    outline: 2px solid var(--accent-300);
+    outline-offset: 3px;
+  }
+
+  .print-resume-open {
+    background: var(--roxo-200);
+    border: 1px solid transparent;
+    color: var(--ink-900);
+  }
+  .print-resume-open:hover {
+    background: var(--roxo-300);
+    transform: scale(1.03);
+  }
+
+  .print-resume-download {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+  }
+  .print-resume-download:hover {
+    border-color: color-mix(in srgb, var(--accent-300) 55%, transparent);
+    color: var(--accent-200);
+  }
+
+  .print-resume-caption {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-mute);
+  }
+
+  @media (max-width: 520px) {
+    .print-resume-sheet {
+      max-height: 52vh;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .print-resume-trigger,
+    .print-resume-close,
+    .print-resume-open,
+    .print-resume-download,
+    .print-resume-panel,
+    .print-resume-sheet-wrap,
+    .print-resume-label,
+    .print-resume-actions,
+    .print-resume-caption,
+    .print-resume-peek {
+      transition: none;
+    }
+    .print-resume-panel {
+      opacity: 1;
+      transform: none;
+    }
+    .print-resume-sheet-wrap,
+    .print-resume-label,
+    .print-resume-actions,
+    .print-resume-caption {
+      opacity: 1;
+      transform: none;
+    }
+    .print-resume-peek,
+    .print-resume-trigger-wrap:hover .print-resume-peek,
+    .print-resume-trigger-wrap:focus-within .print-resume-peek {
+      transform: translateY(-50%);
+    }
+  }
+</style>
+
+<script>
+  const DURATION_STORAGE_KEY = 'print-resume-seen';
+  const FIRST_RUN_DURATION = 4200;
+  const REPEAT_DURATION = 2200;
+  const EASE_POWER = 4;
+  const STEPS = 42;
+
+  // módulo: persiste durante a navegação SPA-like (sem reload); o
+  // sessionStorage cobre a mesma visita entre reloads/novas abas do mesmo
+  // domínio.
+  let hasPrintedBefore = false;
+  try {
+    hasPrintedBefore = sessionStorage.getItem(DURATION_STORAGE_KEY) === '1';
+  } catch {
+    hasPrintedBefore = false;
+  }
+
+  const trigger = document.getElementById('print-resume-trigger');
+  const dialog = document.querySelector<HTMLDialogElement>('#print-resume-dialog');
+  const panel = document.getElementById('print-resume-panel');
+  const closeBtn = document.getElementById('print-resume-close');
+  const openLink = document.getElementById('print-resume-open');
+  const downloadLink = document.getElementById('print-resume-download');
+  const label = document.getElementById('print-resume-label');
+  const sheet = document.getElementById('print-resume-sheet');
+  const scan = document.getElementById('print-resume-scan');
+
+  type LenisLike = { stop?: () => void; start?: () => void };
+
+  let runToken = 0;
+
+  function setFinalState() {
+    if (sheet) sheet.style.clipPath = 'inset(0 0 0% 0)';
+    if (scan) scan.style.display = 'none';
+    if (label) label.textContent = 'Pronto · curriculo-willian-pereira.pdf';
+    openLink?.removeAttribute('hidden');
+    downloadLink?.removeAttribute('hidden');
+  }
+
+  function resetToStart() {
+    if (sheet) sheet.style.clipPath = 'inset(0 0 100% 0)';
+    if (scan) {
+      scan.style.display = '';
+      scan.style.transform = 'translateY(0)';
+    }
+    if (label) label.textContent = 'Imprimindo · 0%';
+    openLink?.setAttribute('hidden', '');
+    downloadLink?.setAttribute('hidden', '');
+  }
+
+  function runPrintAnimation() {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      setFinalState();
+      return;
+    }
+
+    resetToStart();
+    const myToken = ++runToken;
+
+    const duration = hasPrintedBefore ? REPEAT_DURATION : FIRST_RUN_DURATION;
+    const sheetHeight = sheet?.offsetHeight ?? 0;
+    const start = performance.now();
+
+    function frame(now: number) {
+      if (myToken !== runToken) return;
+
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - t, EASE_POWER);
+
+      const stepped = Math.floor(eased * STEPS) / STEPS;
+      if (sheet) sheet.style.clipPath = `inset(0 0 ${(1 - stepped) * 100}% 0)`;
+      if (scan) scan.style.transform = `translateY(${eased * sheetHeight}px)`;
+      if (label) label.textContent = `Imprimindo · ${Math.round(eased * 100)}%`;
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        setFinalState();
+        hasPrintedBefore = true;
+        try {
+          sessionStorage.setItem(DURATION_STORAGE_KEY, '1');
+        } catch {
+          // ignora — sessionStorage indisponível (modo privado, etc)
+        }
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  let isClosing = false;
+
+  function openDialog() {
+    if (!dialog) return;
+    (window as unknown as { __lenis?: LenisLike }).__lenis?.stop?.();
+    document.documentElement.style.overflow = 'hidden';
+    dialog.showModal();
+    // dois rAF: garante que o navegador pinte o estado inicial (opacity:0)
+    // antes de ligar a classe que dispara a transição — sem isso o fade
+    // às vezes entra "pronto", sem transicionar.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => dialog.classList.add('is-open'));
+    });
+    closeBtn?.focus();
+    runPrintAnimation();
+  }
+
+  // Fecha com o mesmo fade em reverso (inclusive por Esc, que abortaria a
+  // <dialog> de uma vez via 'cancel' sem isso) antes de chamar
+  // dialog.close() de fato.
+  function beginClose() {
+    if (!dialog || isClosing) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion || !panel) {
+      dialog.close();
+      return;
+    }
+
+    isClosing = true;
+    dialog.classList.remove('is-open');
+
+    const finish = () => {
+      panel.removeEventListener('transitionend', onTransitionEnd);
+      clearTimeout(fallback);
+      isClosing = false;
+      dialog?.close();
+    };
+    function onTransitionEnd(e: TransitionEvent) {
+      if (e.target === panel && e.propertyName === 'transform') finish();
+    }
+    panel.addEventListener('transitionend', onTransitionEnd);
+    const fallback = setTimeout(finish, 700);
+  }
+
+  trigger?.addEventListener('click', openDialog);
+  closeBtn?.addEventListener('click', beginClose);
+
+  // clique no próprio <dialog> fora do conteúdo fecha
+  dialog?.addEventListener('click', (e) => {
+    if (e.target === dialog) beginClose();
+  });
+
+  // Esc dispara 'cancel' antes de 'close' — intercepta pra rodar a mesma
+  // animação de saída em vez de fechar instantaneamente
+  dialog?.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    beginClose();
+  });
+
+  // 'close' cobre Esc, X e clique fora de uma vez só (já disparado depois
+  // da animação de saída, via beginClose)
+  dialog?.addEventListener('close', () => {
+    runToken++;
+    dialog.classList.remove('is-open');
+    document.documentElement.style.overflow = '';
+    (window as unknown as { __lenis?: LenisLike }).__lenis?.start?.();
+    trigger?.focus();
+  });
+</script>

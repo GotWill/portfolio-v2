@@ -16,14 +16,6 @@ import '../styles/global.css';
 
 		<Font cssVariable="--font-display" preload />
 		<Font cssVariable="--font-mono" preload />
-
-		<script is:inline>
-			(function () {
-				var stored = localStorage.getItem('theme');
-				var theme = stored === 'light' ? 'light' : 'dark';
-				document.documentElement.setAttribute('data-theme', theme);
-			})();
-		</script>
 	</head>
 	<body>
 		<slot />
