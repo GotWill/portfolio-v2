@@ -1,5 +1,6 @@
 ---
 import { Font } from 'astro:assets';
+import Analytics from '@vercel/analytics/astro';
 import '../styles/tokens.css';
 import '../styles/global.css';
 ---
@@ -19,6 +20,7 @@ import '../styles/global.css';
 	</head>
 	<body>
 		<slot />
+		<Analytics />
 	</body>
 </html>
 
